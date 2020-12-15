@@ -20,7 +20,7 @@ func TestTracker_HasChanged(t *testing.T) {
 		resources         []*asset.Resource
 		modifications     []*asset.Resource
 		expectedURL       string
-		expectedOperation int
+		expectedOperation Operation
 		checkFrequency    time.Duration
 	}{
 		{
@@ -33,7 +33,7 @@ func TestTracker_HasChanged(t *testing.T) {
 				asset.NewFile("def.json", []byte(" car sar"), file.DefaultFileOsMode),
 			},
 			expectedURL:       "mem://localhost/case1/def.json",
-			expectedOperation: 0,
+			expectedOperation: OperationAdded,
 			checkFrequency:    1 * time.Second,
 		},
 	}
@@ -60,8 +60,9 @@ func TestTracker_HasChanged(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		actualURL := ""
-		actualOperation := OperationUndefined
+		var actualOperation Operation = OperationUndefined
 		time.Sleep(2 * time.Second)
 		err = tracker.Notify(ctx, fs, func(URL string, operation Operation) {
 			actualURL = URL
