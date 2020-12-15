@@ -13,8 +13,8 @@ import (
 
 type Tracker struct {
 	baseURL        string
-	resources      map[string]time.Time
-	mutex          *sync.Mutex
+	resources      map[string]time.Time // map between resource url and last modification time
+	mutex          sync.Mutex
 	checkFrequency time.Duration
 	nextCheck      time.Time
 }
@@ -47,8 +47,8 @@ func (m *Tracker) hasChanges(routes []storage.Object) bool {
 
 }
 
-//HasChanged returns true if resource under base URL have changed
-func (m *Tracker) HasChanged(ctx context.Context, fs afs.Service, callback func(URL string, operation int)) error {
+//Notify returns true if resource under base URL have changed
+func (m *Tracker) Notify(ctx context.Context, fs afs.Service, callback func(URL string, operation int)) error {
 	if m.baseURL == "" {
 		return nil
 	}
@@ -56,17 +56,17 @@ func (m *Tracker) HasChanged(ctx context.Context, fs afs.Service, callback func(
 		return nil
 	}
 
-	routes, err := fs.List(ctx, m.baseURL, option.NewRecursive(true))
+	resources, err := fs.List(ctx, m.baseURL, option.NewRecursive(true))
 	if err != nil {
 		return errors.Wrapf(err, "failed to load rules %v", m.baseURL)
 	}
-	if !m.hasChanges(routes) {
+	if !m.hasChanges(resources) {
 		return nil
 	}
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	m.resources = make(map[string]time.Time)
-	for _, route := range routes {
+	for _, route := range resources {
 		if route.IsDir() || !(path.Ext(route.Name()) == ".json" || path.Ext(route.Name()) == ".yaml") {
 			continue
 		}
@@ -75,13 +75,13 @@ func (m *Tracker) HasChanged(ctx context.Context, fs afs.Service, callback func(
 	return nil
 }
 
-func NewMeta(baeURL string, checkFrequency time.Duration) *Tracker {
+func New(baeURL string, checkFrequency time.Duration) *Tracker {
 	if checkFrequency == 0 {
 		checkFrequency = time.Minute
 	}
 	return &Tracker{
 		checkFrequency: checkFrequency,
-		mutex:          &sync.Mutex{},
+		mutex:          sync.Mutex{},
 		baseURL:        baeURL,
 		resources:      make(map[string]time.Time),
 	}
