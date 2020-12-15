@@ -6,14 +6,13 @@ import (
 	"github.com/viant/afs/option"
 	"github.com/viant/afs/storage"
 	"golang.org/x/net/context"
-	"path"
 	"sync"
 	"time"
 )
 
 type Tracker struct {
 	baseURL        string
-	resources      map[string]time.Time // map between resource url and last modification time
+	assets         Assets
 	mutex          sync.Mutex
 	checkFrequency time.Duration
 	nextCheck      time.Time
@@ -27,19 +26,19 @@ func (m *Tracker) isCheckDue(now time.Time) bool {
 	return false
 }
 
-func (m *Tracker) hasChanges(routes []storage.Object) bool {
-	if len(routes) != len(m.resources) {
+func (m *Tracker) hasChanges(assets []storage.Object) bool {
+	if len(assets) != len(m.assets) {
 		return true
 	}
-	for _, route := range routes {
-		if route.IsDir() {
+	for _, asset := range assets {
+		if asset.IsDir() {
 			continue
 		}
-		modTime, ok := m.resources[route.URL()]
+		mAsset, ok := m.assets[asset.URL()]
 		if !ok {
 			return true
 		}
-		if !modTime.Equal(route.ModTime()) {
+		if !mAsset.ModTime().Equal(asset.ModTime()) {
 			return true
 		}
 	}
@@ -48,7 +47,7 @@ func (m *Tracker) hasChanges(routes []storage.Object) bool {
 }
 
 //Notify returns true if resource under base URL have changed
-func (m *Tracker) Notify(ctx context.Context, fs afs.Service, callback func(URL string, operation int)) error {
+func (m *Tracker) Notify(ctx context.Context, fs afs.Service, callback func(URL string, operation Operation)) error {
 	if m.baseURL == "" {
 		return nil
 	}
@@ -63,26 +62,34 @@ func (m *Tracker) Notify(ctx context.Context, fs afs.Service, callback func(URL 
 	if !m.hasChanges(resources) {
 		return nil
 	}
+	assets := NewAssets(resources)
+
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	m.resources = make(map[string]time.Time)
-	for _, route := range resources {
-		if route.IsDir() || !(path.Ext(route.Name()) == ".json" || path.Ext(route.Name()) == ".yaml") {
-			continue
-		}
-		m.resources[route.URL()] = route.ModTime()
+	if len(m.assets) == 0 {
+		m.assets = make(map[string]storage.Object)
 	}
+
+	m.assets.Added(assets, func(object storage.Object) {
+		callback(object.URL(), OperationAdded)
+	})
+	m.assets.Modified(assets, func(object storage.Object) {
+		callback(object.URL(), OperationModified)
+	})
+	m.assets.Deleted(assets, func(object storage.Object) {
+		callback(object.URL(), OperationDeleted)
+	})
 	return nil
 }
 
-func New(baeURL string, checkFrequency time.Duration) *Tracker {
+func New(baseURL string, checkFrequency time.Duration) *Tracker {
 	if checkFrequency == 0 {
 		checkFrequency = time.Minute
 	}
 	return &Tracker{
 		checkFrequency: checkFrequency,
 		mutex:          sync.Mutex{},
-		baseURL:        baeURL,
-		resources:      make(map[string]time.Time),
+		baseURL:        baseURL,
+		assets:         make(map[string]storage.Object),
 	}
 }

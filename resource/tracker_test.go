@@ -18,24 +18,23 @@ func TestTracker_HasChanged(t *testing.T) {
 		description       string
 		baseURL           string
 		resources         []*asset.Resource
-		modifcations      []*asset.Resource
+		modifications     []*asset.Resource
 		expectedURL       string
 		expectedOperation int
-		checkFrequency   time.Duration
-
+		checkFrequency    time.Duration
 	}{
 		{
-			description:       "test addition url ",
-			baseURL:           "mem://localhost/case1",
-			resources:        [] *asset.Resource{
-				asset.NewFile("abc.txt",[]byte ("foo bar") ,file.DefaultFileOsMode),
-			} ,
-			modifcations: [] *asset.Resource {
-				asset.NewFile("def.txt",[]byte (" car sar"), file.DefaultFileOsMode),
+			description: "test addition url ",
+			baseURL:     "mem://localhost/case1",
+			resources: []*asset.Resource{
+				asset.NewFile("abc.json", []byte("foo bar"), file.DefaultFileOsMode),
 			},
-			expectedURL: "mem://localhost/case1/def.txt",
+			modifications: []*asset.Resource{
+				asset.NewFile("def.json", []byte(" car sar"), file.DefaultFileOsMode),
+			},
+			expectedURL:       "mem://localhost/case1/def.json",
 			expectedOperation: 0,
-			checkFrequency: 1*time.Second,
+			checkFrequency:    1 * time.Second,
 		},
 	}
 	ctx := context.Background()
@@ -49,29 +48,28 @@ func TestTracker_HasChanged(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		tracker := New(useCase.baseURL,useCase.checkFrequency)
+		tracker := New(useCase.baseURL, useCase.checkFrequency)
 		initialResourcesCount := 0
-		fmt.Printf("is next change : %v\n",tracker.nextCheck.IsZero())
-		err = tracker.Notify(ctx,fs, func(URL string, operation int) {
+		fmt.Printf("is next change : %v\n", tracker.nextCheck.IsZero())
+		err = tracker.Notify(ctx, fs, func(URL string, operation Operation) {
 			initialResourcesCount++
 		})
-		assert.Nil(t,err,useCase.description)
-		assert.Equal(t,len(useCase.resources),initialResourcesCount,useCase.description)
-		err = asset.Create(mgr, useCase.baseURL, useCase.modifcations)
+		assert.Nil(t, err, useCase.description)
+		assert.Equal(t, len(useCase.resources), initialResourcesCount, useCase.description)
+		err = asset.Create(mgr, useCase.baseURL, useCase.modifications)
 		if err != nil {
 			log.Fatal(err)
 		}
 		actualURL := ""
-		actualOperation := -1
-		time.Sleep(2*time.Second)
-		err = tracker.Notify(ctx,fs, func(URL string, operation int) {
+		actualOperation := OperationUndefined
+		time.Sleep(2 * time.Second)
+		err = tracker.Notify(ctx, fs, func(URL string, operation Operation) {
 			actualURL = URL
 			actualOperation = operation
 		})
 
-		assert.EqualValues(t,useCase.expectedURL,actualURL,useCase.description)
-		assert.EqualValues(t,useCase.expectedOperation,actualOperation,useCase.description)
-
+		assert.EqualValues(t, useCase.expectedURL, actualURL, useCase.description)
+		assert.EqualValues(t, useCase.expectedOperation, actualOperation, useCase.description)
 
 	}
 }
