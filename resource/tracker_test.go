@@ -32,8 +32,8 @@ func TestTracker_HasChanged(t *testing.T) {
 			modifications: []*asset.Resource{
 				asset.NewFile("def.json", []byte(" car sar"), file.DefaultFileOsMode),
 			},
-			expectedURL:       "mem://localhost/case1/def.json",
-			expectedOperation: OperationAdded,
+			expectedURL:       "mem://localhost/case1/abc.json",
+			expectedOperation: OperationDeleted,
 			checkFrequency:    1 * time.Second,
 		},
 	}
@@ -56,11 +56,11 @@ func TestTracker_HasChanged(t *testing.T) {
 		})
 		assert.Nil(t, err, useCase.description)
 		assert.Equal(t, len(useCase.resources), initialResourcesCount, useCase.description)
+
 		err = asset.Create(mgr, useCase.baseURL, useCase.modifications)
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		actualURL := ""
 		var actualOperation Operation = OperationUndefined
 		time.Sleep(2 * time.Second)
