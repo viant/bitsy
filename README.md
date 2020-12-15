@@ -1,0 +1,2 @@
+# bitsy
+Bitset data indexer
