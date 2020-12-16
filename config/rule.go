@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/viant/afs/matcher"
-	"github.com/viant/bitsy/resource"
 	"github.com/viant/cloudless/data/processor"
+	"github.com/viant/cloudless/resource"
 )
 
 type Field struct {
@@ -31,9 +31,18 @@ type Rule struct {
 	Source         matcher.Basic
 }
 
+func (r Rule) IsText(field string) bool {
+	for _, item := range r.IndexingFields {
+		if item.Name == field {
+			return item.Type == "string"
+		}
+	}
+	return false
+}
+
 type Rules struct {
 	BaseURL   string
 	CheckInMs int
 	Rules     []*Rule
-	meta      *resource.Tracker
+	*resource.Tracker
 }
