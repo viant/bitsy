@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/viant/bitsy/config"
+	"github.com/viant/bitsy/index"
 	"github.com/viant/cloudless/data/processor"
 	"github.com/viant/cloudless/data/processor/destination"
 	"github.com/viant/tapper/log"
 	"github.com/viant/tapper/msg"
 	"github.com/viant/toolbox"
-	"github.vianttech.com/adelphic/forecast-indexer/index"
 	"strconv"
 )
 
