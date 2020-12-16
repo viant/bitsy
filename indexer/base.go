@@ -1,7 +1,6 @@
 package indexer
 
 type Base struct {
-	Timestamp string
-	BatchID   int
+	*Event
 	Events    int64
 }

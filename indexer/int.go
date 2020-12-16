@@ -1,6 +1,6 @@
 package indexer
 
-type Numeric struct {
+type Int struct {
 	Base
 	Value int
 }

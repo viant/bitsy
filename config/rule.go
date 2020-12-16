@@ -23,12 +23,14 @@ type Destination struct {
 
 type Rule struct {
 	processor.Config
-	TimeField      string
-	BatchField     string
-	SequenceField  string
-	IndexingFields []Field
-	Dest           Destination
-	Source         matcher.Basic
+	TimeField          string
+	BatchField         string
+	SequenceField      string
+	PartitionField     string
+	IndexingFields     []Field
+	AllowQuotedNumbers bool
+	Dest               Destination
+	Source             matcher.Basic
 }
 
 func (r Rule) IsText(field string) bool {
