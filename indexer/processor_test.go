@@ -38,6 +38,22 @@ func Test_Process(t *testing.T) {
 				BatchField:    "batch_id",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
+				IndexingFields: []config.Field {
+					{
+						Name: "name",
+						Type: "string",
+					},
+					{
+						Name: "country",
+						Type: "string",
+					},
+					{
+						Name: "city_id",
+						Type: "int",
+					},
+
+
+				},
 
 				Config: processor.Config{
 					DestinationURL: "mem://localhost/data/$fragment/data.json",
@@ -67,7 +83,7 @@ func Test_Process(t *testing.T) {
 				Dest: config.Destination{
 					URL:           "",
 					TableRoot:     "test_",
-					TextPrefix:    "text",
+					TextPrefix:    "text/",
 					NumericPrefix: "num/",
 					FloatPrefix:   "float/",
 					URIKeyName:    "$fragment",
@@ -79,9 +95,16 @@ func Test_Process(t *testing.T) {
 				Config: processor.Config{
 					DestinationURL: "mem://localhost/case2/$fragment/data.json",
 				},
+				IndexingFields: []config.Field {
+					{
+						Name: "segments",
+						Type: "int",
+					},
+				},
+				AllowQuotedNumbers: true,
 			},
 			expectedURL: "mem://localhost/case2/",
-			input: `{"id": 1, "segments": ["1","10",100],"batch_id":1, "seq":0, "tstamp":"2020-11-01 01:01:01"}
+			input: `{"id": 1, "segments": ["1","10","100"],"batch_id":1, "seq":0, "tstamp":"2020-11-01 01:01:01"}
 {"id": 2, "segments": [1,20],"batch_id":1, "seq":1, "tstamp":"2020-11-01 01:01:01"}
 {"id": 3, "segments": [1,10,100], "batch_id":1,"seq":2, "tstamp":"2020-11-01 01:01:01"}`,
 			expected: map[string]string{
@@ -99,7 +122,7 @@ func Test_Process(t *testing.T) {
 				Dest: config.Destination{
 					URL:           "",
 					TableRoot:     "test_",
-					TextPrefix:    "text",
+					TextPrefix:    "text/",
 					NumericPrefix: "num/",
 					FloatPrefix:   "float/",
 					URIKeyName:    "$fragment",
@@ -110,6 +133,12 @@ func Test_Process(t *testing.T) {
 				TimeField:     "tstamp",
 				Config: processor.Config{
 					DestinationURL: "mem://localhost/case2/$fragment/data.json",
+				},
+				IndexingFields: []config.Field {
+					{
+						Name: "is_pmp",
+						Type: "bool",
+					},
 				},
 			},
 			expectedURL: "mem://localhost/case2/",

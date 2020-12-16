@@ -75,25 +75,18 @@ func (p *Processor) indexEvents(events [][]byte, textFields map[string]Texts, nu
 				}
 			case "int":
 
-				if isRepeated {
-					ints := dec.Ints{Items: make([]int, 0), AllowQuotedNumbers: p.Rule.AllowQuotedNumbers}
-					if err := gojay.Unmarshal(rawValue, &ints); err != nil {
-						return err
-					}
-					for _, value := range ints.Items {
-						p.indexIntValues(numericFields, field.Name, value, event)
-					}
-				} else {
-					value := 0
-					if err := gojay.Unmarshal(rawValue, &value); err != nil {
-						return err
-					}
-					p.indexIntValues(numericFields, field.Name, value, event)
+				err := p.decodeAndIndexInt(isRepeated, rawValue, numericFields, field, event)
+				if err != nil {
+					return err
 				}
 
 			case "float":
 
 			case "bool":
+				err := p.decodeAndIndexBool(isRepeated, rawValue, boolFields, field, event)
+				if err != nil {
+					return err
+				}
 
 			}
 
@@ -140,7 +133,45 @@ func (p *Processor) indexEvents(events [][]byte, textFields map[string]Texts, nu
 		//		return fmt.Errorf("unsupported type %T", value)
 		//	}
 
+	}
+	return nil
+}
 
+func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, boolFields map[string]Bools, field config.Field, event *Event) error {
+	if isRepeated {
+		bools := dec.Bools{Items: make([]bool, 0)}
+		if err := gojay.Unmarshal(rawValue, &bools); err != nil {
+			return err
+		}
+		for _, value := range bools.Items {
+			p.indexBoolValues(boolFields, field.Name, value, event)
+		}
+	} else {
+		value := false
+		if err := gojay.Unmarshal(rawValue, &value); err != nil {
+			return err
+		}
+		p.indexBoolValues(boolFields, field.Name, value, event)
+	}
+	return nil
+}
+
+func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, numericFields map[string]Ints, field config.Field, event *Event) error {
+	if isRepeated {
+		ints := dec.Ints{Items: make([]int, 0), }
+		ints.IsQuoted = bytes.Contains(rawValue,[]byte (`"`))
+		if err := gojay.Unmarshal(rawValue, &ints); err != nil {
+			return fmt.Errorf("failed due to json unmarshall %s,%w",rawValue,err)
+		}
+		for _, value := range ints.Items {
+			p.indexIntValues(numericFields, field.Name, value, event)
+		}
+	} else {
+		value := 0
+		if err := gojay.Unmarshal(rawValue, &value); err != nil {
+			return err
+		}
+		p.indexIntValues(numericFields, field.Name, value, event)
 	}
 	return nil
 }
