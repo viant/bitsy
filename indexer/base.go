@@ -1,4 +1,4 @@
-package index
+package indexer
 
 type Base struct {
 	Timestamp string

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/viant/bitsy/config"
-	"github.com/viant/bitsy/index"
 	"github.com/viant/cloudless/data/processor"
 	"github.com/viant/cloudless/data/processor/destination"
 	"github.com/viant/tapper/log"
@@ -29,9 +28,9 @@ func (p Processor) Pre(ctx context.Context, reporter processor.Reporter) (contex
 
 //Process process data unit (upto 64 rows)
 func (p *Processor) Process(ctx context.Context, data []byte, reporter processor.Reporter) error {
-	numericFields := make(map[string]index.Numerics)
-	textFields := make(map[string]index.Texts)
-	boolFields := make(map[string]index.Bools)
+	numericFields := make(map[string]Numerics)
+	textFields := make(map[string]Texts)
+	boolFields := make(map[string]Bools)
 	events := bytes.Split(data, []byte{'\n'})
 	err := p.indexEvents(events, textFields, numericFields, boolFields)
 	if err != nil {
@@ -55,7 +54,7 @@ func (p Processor) Post(ctx context.Context, reporter processor.Reporter) error 
 	return logger.Close()
 }
 
-func (p *Processor) indexEvents(events [][]byte, textFields map[string]index.Texts, numericFields map[string]index.Numerics, boolFields map[string]index.Bools) error {
+func (p *Processor) indexEvents(events [][]byte, textFields map[string]Texts, numericFields map[string]Numerics, boolFields map[string]Bools) error {
 	for _, event := range events {
 		record := make(map[string]interface{})
 		err := json.Unmarshal(event, &record)
@@ -112,7 +111,7 @@ func (p *Processor) indexEvents(events [][]byte, textFields map[string]index.Tex
 	return nil
 }
 
-func (p *Processor) logIndexedTexts(textFields map[string]index.Texts, multiLogger *destination.MultiLogger) error {
+func (p *Processor) logIndexedTexts(textFields map[string]Texts, multiLogger *destination.MultiLogger) error {
 	for field, values := range textFields {
 		key := p.Rule.Dest.TextPrefix + p.Rule.Dest.TableRoot + field
 		logger, err := multiLogger.Get(key)
@@ -124,7 +123,7 @@ func (p *Processor) logIndexedTexts(textFields map[string]index.Texts, multiLogg
 	return nil
 }
 
-func (p *Processor) logIndexedNumerics(numericFields map[string]index.Numerics, multiLogger *destination.MultiLogger) error {
+func (p *Processor) logIndexedNumerics(numericFields map[string]Numerics, multiLogger *destination.MultiLogger) error {
 	for field, values := range numericFields {
 		key := p.Rule.Dest.NumericPrefix + p.Rule.Dest.TableRoot + field
 		logger, err := multiLogger.Get(key)
@@ -136,7 +135,7 @@ func (p *Processor) logIndexedNumerics(numericFields map[string]index.Numerics, 
 	return nil
 }
 
-func (p Processor) logIndexedBools(boolFields map[string]index.Bools, multiLogger *destination.MultiLogger) error {
+func (p Processor) logIndexedBools(boolFields map[string]Bools, multiLogger *destination.MultiLogger) error {
 
 	for field, values := range boolFields {
 		key := p.Rule.Dest.BooleanPrefix + p.Rule.Dest.TableRoot + field
@@ -149,14 +148,14 @@ func (p Processor) logIndexedBools(boolFields map[string]index.Bools, multiLogge
 	return nil
 }
 
-func (p *Processor) indexTextValues(textFields map[string]index.Texts, key string, actual string, timestamp string, batchId int, seqId int) {
+func (p *Processor) indexTextValues(textFields map[string]Texts, key string, actual string, timestamp string, batchId int, seqId int) {
 	if _, ok := textFields[key]; !ok {
-		textFields[key] = index.Texts{}
+		textFields[key] = Texts{}
 	}
 	textValues := textFields[key]
 	if _, ok := textValues[actual]; !ok {
-		textValues[actual] = &index.Text{
-			Base: index.Base{
+		textValues[actual] = &Text{
+			Base: Base{
 				Timestamp: timestamp,
 				BatchID:   batchId,
 				Events:    0,
@@ -168,14 +167,14 @@ func (p *Processor) indexTextValues(textFields map[string]index.Texts, key strin
 	textValue.Events = textValue.Events | oneBit<<seqId
 }
 
-func (p *Processor) indexNumericValues(numericFields map[string]index.Numerics, key string, actual int, timestamp string, batchId int, seqId int) {
+func (p *Processor) indexNumericValues(numericFields map[string]Numerics, key string, actual int, timestamp string, batchId int, seqId int) {
 	if _, ok := numericFields[key]; !ok {
-		numericFields[key] = index.Numerics{}
+		numericFields[key] = Numerics{}
 	}
 	numericValues := numericFields[key]
 	if _, ok := numericValues[actual]; !ok {
-		numericValues[actual] = &index.Numeric{
-			Base: index.Base{
+		numericValues[actual] = &Numeric{
+			Base: Base{
 				Timestamp: timestamp,
 				BatchID:   batchId,
 				Events:    0,
@@ -187,14 +186,14 @@ func (p *Processor) indexNumericValues(numericFields map[string]index.Numerics, 
 	numericValue.Events = numericValue.Events | oneBit<<(seqId)
 }
 
-func (p Processor) indexBoolValues(boolFields map[string]index.Bools, key string, actual bool, timestamp string, batchId int, seqId int) {
+func (p Processor) indexBoolValues(boolFields map[string]Bools, key string, actual bool, timestamp string, batchId int, seqId int) {
 	if _, ok := boolFields[key]; !ok {
-		boolFields[key] = index.Bools{}
+		boolFields[key] = Bools{}
 	}
 	boolValues := boolFields[key]
 	if _, ok := boolValues[actual]; !ok {
-		boolValues[actual] = &index.Bool{
-			Base: index.Base{
+		boolValues[actual] = &Bool{
+			Base: Base{
 				Timestamp: timestamp,
 				BatchID:   batchId,
 				Events:    0,
@@ -207,13 +206,13 @@ func (p Processor) indexBoolValues(boolFields map[string]index.Bools, key string
 
 }
 
-func (p *Processor) logBase(message *msg.Message, value *index.Base) {
+func (p *Processor) logBase(message *msg.Message, value *Base) {
 	message.PutNonEmptyString(p.Rule.TimeField, value.Timestamp)
 	message.PutInt(p.Rule.BatchField, value.BatchID)
 	message.PutInt("events", int(value.Events))
 }
 
-func (p *Processor) logNumeric(logger *log.Logger, values index.Numerics) {
+func (p *Processor) logNumeric(logger *log.Logger, values Numerics) {
 	for _, value := range values {
 		message := p.msgProvider.NewMessage()
 		p.logBase(message, &value.Base)
@@ -223,7 +222,7 @@ func (p *Processor) logNumeric(logger *log.Logger, values index.Numerics) {
 	}
 }
 
-func (p *Processor) logText(logger *log.Logger, values index.Texts) {
+func (p *Processor) logText(logger *log.Logger, values Texts) {
 	for _, value := range values {
 		message := p.msgProvider.NewMessage()
 		p.logBase(message, &value.Base)
@@ -233,7 +232,7 @@ func (p *Processor) logText(logger *log.Logger, values index.Texts) {
 	}
 }
 
-func (p Processor) logBool(logger *log.Logger, values index.Bools) {
+func (p Processor) logBool(logger *log.Logger, values Bools) {
 	for _, value := range values {
 		message := p.msgProvider.NewMessage()
 		p.logBase(message, &value.Base)

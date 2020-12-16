@@ -17,7 +17,7 @@ func Test_Process(t *testing.T) {
 
 	var useCases = []struct {
 		description string
-		*config.Rule
+		config.Rule
 		input       string
 		expectedURL string
 		expected    map[string]string
@@ -26,19 +26,22 @@ func Test_Process(t *testing.T) {
 
 		{
 			description: "multi rows index",
-			Config: Config{
-				TableRoot:      "test_",
-				NumericPrefix:  "num/",
-				TextPrefix:     "text/",
-				BatchField:     "batch_id",
-				SequenceField:  "seq",
-				TimeField:      "tstamp",
-				ExcludedFields: []string{"id", "seq", "batch_id", "tstamp"},
-				URIKeyName:     "$fragment",
+			Rule: config.Rule{
+				Dest: config.Destination{
+					TableRoot:     "test_",
+					TextPrefix:    "text/",
+					NumericPrefix: "num/",
+					FloatPrefix:   "float/",
+					URIKeyName:    "$fragment",
+					BooleanPrefix: "bool/",
+				},
+				BatchField:    "batch_id",
+				SequenceField: "seq",
+				TimeField:     "tstamp",
+
 				Config: processor.Config{
 					DestinationURL: "mem://localhost/data/$fragment/data.json",
 				},
-				BooleanPrefix: "bool/",
 			},
 			expectedURL: "mem://localhost/data/",
 			input: `{"id": 1, "name": "Adam", "country": "us", "city_id":1, "batch_id":1, "seq":0, "tstamp":"2020-11-01 01:01:01"}
@@ -60,19 +63,22 @@ func Test_Process(t *testing.T) {
 		},
 		{
 			description: "repeated rows index",
-			Config: Config{
-				TableRoot:      "test_",
-				NumericPrefix:  "num/",
-				TextPrefix:     "text/",
-				BatchField:     "batch_id",
-				SequenceField:  "seq",
-				TimeField:      "tstamp",
-				ExcludedFields: []string{"id", "seq", "batch_id", "tstamp"},
-				URIKeyName:     "$fragment",
+			Rule: config.Rule{
+				Dest: config.Destination{
+					URL:           "",
+					TableRoot:     "test_",
+					TextPrefix:    "text",
+					NumericPrefix: "num/",
+					FloatPrefix:   "float/",
+					URIKeyName:    "$fragment",
+					BooleanPrefix: "bool/",
+				},
+				BatchField:    "batch_id",
+				SequenceField: "seq",
+				TimeField:     "tstamp",
 				Config: processor.Config{
 					DestinationURL: "mem://localhost/case2/$fragment/data.json",
 				},
-				BooleanPrefix: "bool/",
 			},
 			expectedURL: "mem://localhost/case2/",
 			input: `{"id": 1, "segments": ["1","10",100],"batch_id":1, "seq":0, "tstamp":"2020-11-01 01:01:01"}
@@ -89,19 +95,22 @@ func Test_Process(t *testing.T) {
 		},
 		{
 			description: "boolean rows index",
-			Config: Config{
-				TableRoot:      "test_",
-				NumericPrefix:  "num/",
-				TextPrefix:     "text/",
-				BatchField:     "batch_id",
-				SequenceField:  "seq",
-				TimeField:      "tstamp",
-				ExcludedFields: []string{"id", "seq", "batch_id", "tstamp"},
-				URIKeyName:     "$fragment",
+			Rule: config.Rule{
+				Dest: config.Destination{
+					URL:           "",
+					TableRoot:     "test_",
+					TextPrefix:    "text",
+					NumericPrefix: "num/",
+					FloatPrefix:   "float/",
+					URIKeyName:    "$fragment",
+					BooleanPrefix: "bool/",
+				},
+				BatchField:    "batch_id",
+				SequenceField: "seq",
+				TimeField:     "tstamp",
 				Config: processor.Config{
 					DestinationURL: "mem://localhost/case2/$fragment/data.json",
 				},
-				BooleanPrefix: "bool/",
 			},
 			expectedURL: "mem://localhost/case2/",
 			input: `{"id": 1, "is_pmp": true,"batch_id":1, "seq":0, "tstamp":"2020-11-01 01:01:01"}
@@ -121,7 +130,7 @@ func Test_Process(t *testing.T) {
 	for _, useCase := range useCases {
 
 		ctx := context.Background()
-		proc := New(&useCase.Config)
+		proc := New(&useCase.Rule)
 
 		reporter := processor.NewReporter()
 		reporter.BaseResponse().DestinationURL = useCase.Config.ExpandDestinationURL(time.Now())

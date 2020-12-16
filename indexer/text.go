@@ -1,4 +1,4 @@
-package index
+package indexer
 
 type Text struct {
 	Base
