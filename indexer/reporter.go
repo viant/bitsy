@@ -6,4 +6,8 @@ type Reporter struct {
 	processor.Reporter
 }
 
+func NewReporter() *Reporter {
+	return &Reporter{}
+}
+
 

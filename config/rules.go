@@ -26,19 +26,18 @@ func (r *Rules) Match(URL string) []*Rule {
 	return nil
 }
 
-func (r *Rules) ReloadIfNeeded(ctx context.Context, fs afs.Service) {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-
+func (r *Rules) ReloadIfNeeded(ctx context.Context, fs afs.Service) error {
 	var rules = make(map[string]*Rule)
 	hasChanged := false
 	//TODO return bool, error in case notified was called ?
-	r.Notify(ctx, fs, func(URL string, operation resource.Operation) {
+	err := r.Notify(ctx, fs, func(URL string, operation resource.Operation) {
 		hasChanged = true
 		if len(rules) == 0 {
+			r.mux.RLock()
 			for i, rule := range r.Indexes {
 				rules[rule.SourceURL] = r.Indexes[i]
 			}
+			r.mux.RUnlock()
 		}
 
 		switch operation {
@@ -48,6 +47,7 @@ func (r *Rules) ReloadIfNeeded(ctx context.Context, fs afs.Service) {
 				log.Printf("failed to load %v, %v\n", URL, err)
 				return
 			}
+			rule.SourceURL = URL
 			rules[rule.SourceURL] = rule
 
 		case resource.OperationDeleted:
@@ -56,8 +56,18 @@ func (r *Rules) ReloadIfNeeded(ctx context.Context, fs afs.Service) {
 
 		return
 	})
+	if err != nil || !hasChanged{
+		return err
+	}
 	//Convert rules to r.Indexes
-
+	var updatedRules = make([]*Rule,0)
+	for key,_ := range rules {
+		updatedRules = append(updatedRules,rules[key])
+	}
+	r.mux.Lock()
+	defer r.mux.Unlock()
+	r.Indexes = updatedRules
+	return nil
 }
 
 func (r *Rules) loadRule(ctx context.Context, URL string, fs afs.Service) (*Rule, error) {
@@ -82,5 +92,14 @@ func (r *Rules) Init() {
 func (r *Rules) ProcessorConfig(rule *Rule) processor.Config {
 	cfg := r.Config
 	cfg.DestinationURL = rule.Dest.URL
+	cfg.BatchSize = 64
+	cfg.Sort.Format = "json"
+	cfg.Sort.Batch = true
+	cfg.Sort.By = []processor.Field{
+		{
+			Name:      rule.BatchField,
+			IsNumeric: true,
+		},
+	}
 	return cfg
 }

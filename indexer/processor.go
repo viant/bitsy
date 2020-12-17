@@ -349,8 +349,8 @@ func (p Processor) logBool(logger *log.Logger, values Bools) {
 }
 
 //NewProcessor creates a new processor
-func NewProcessor(rule *config.Rule) *Processor {
+func NewProcessor(rule *config.Rule, concurrency int) *Processor {
 	return &Processor{Rule: rule,
-		msgProvider: msg.NewProvider(16*1024, rule.Concurrency),
+		msgProvider: msg.NewProvider(16*1024, concurrency),
 	}
 }

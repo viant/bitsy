@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/viant/afs/matcher"
+	"strings"
 )
 
 type Field struct {
@@ -55,9 +56,27 @@ func (d *Destination) Init() {
 
 }
 
+func(d *Destination) Validate() error {
+	if d.URL == "" {
+		return fmt.Errorf("destination URL was empty")
+	}
+	if !strings.Contains(d.URL, d.URIKeyName) {
+		return fmt.Errorf("destionaionURL %v doesn't contain %v", d.URL, d.URIKeyName)
+	}
+
+	return nil
+}
+
 func (r *Rule) Validate() error {
-	if len(r.BatchField) == 0 {
-		return fmt.Errorf("batch field is missing")
+	err := r.Validate()
+	if err != nil {
+		return err
+	}
+	if r.BatchField == "" {
+		return fmt.Errorf("batchfield was empty")
+	}
+	if r.SequenceField == "" {
+		return fmt.Errorf("sequencefield was empty")
 	}
 	return nil
 }
