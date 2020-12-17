@@ -1,0 +1,18 @@
+source:
+  prefix: /cast001/
+  suffix: json
+
+dest:
+  URL: mem://localhost/index/cast01/
+  TableRoot: myTable
+
+timeField: ts
+batchField: batchId
+sequenceField: seq
+partitionField: part_id
+allowQuotedNumbers: true
+indexingFields:
+  - Name: city_id
+    Type: int
+  - Name: name
+    Type: string

@@ -1,0 +1,6 @@
+Concurency: 100
+CorruptionURL: mem://localhost/bitsy/corrupted
+FailedURL: mem://localhost/bitsy/failed
+RetryURL: mem://localhost/trigger
+
+BaseURL: test_data/index/01_yaml/rules

@@ -1,8 +1,7 @@
 package config
 
-
+import "github.com/viant/cloudless/data/processor"
 
 type Config struct {
-	//base.Config
-	Rules Rules
+	Rules
 }

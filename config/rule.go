@@ -22,6 +22,7 @@ type Destination struct {
 }
 
 type Rule struct {
+	SourceURL string
 	processor.Config
 	TimeField          string
 	BatchField         string
@@ -31,20 +32,4 @@ type Rule struct {
 	AllowQuotedNumbers bool
 	Dest               Destination
 	Source             matcher.Basic
-}
-
-func (r Rule) IsText(field string) bool {
-	for _, item := range r.IndexingFields {
-		if item.Name == field {
-			return item.Type == "string"
-		}
-	}
-	return false
-}
-
-type Rules struct {
-	BaseURL   string
-	CheckInMs int
-	Rules     []*Rule
-	*resource.Tracker
 }

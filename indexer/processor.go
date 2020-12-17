@@ -108,12 +108,11 @@ func (p *Processor) indexEvents(events [][]byte, textFields map[string]Texts, nu
 
 func (p *Processor) decodeAndIndexFloat(isRepeated bool, rawValue []byte, floatFields map[string]Floats, field config.Field, event *Event) error {
 	if isRepeated {
-		floats := dec.Floats{Items: make([]float64, 0)}
+		floats := dec.Floats{Callback: func(value float64) {
+			p.indexFloatValues(floatFields, field.Name, value, event)
+		}}
 		if err := gojay.Unmarshal(rawValue, &floats); err != nil {
 			return fmt.Errorf("failed due to json unmarshall %s,%w", rawValue, err)
-		}
-		for _, value := range floats.Items {
-			p.indexFloatValues(floatFields, field.Name, value, event)
 		}
 	} else {
 		value := 0.0
@@ -127,12 +126,11 @@ func (p *Processor) decodeAndIndexFloat(isRepeated bool, rawValue []byte, floatF
 
 func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, boolFields map[string]Bools, field config.Field, event *Event) error {
 	if isRepeated {
-		bools := dec.Bools{Items: make([]bool, 0)}
+		bools := dec.Bools{Callback: func(value bool) {
+			p.indexBoolValues(boolFields, field.Name, value, event)
+		}}
 		if err := gojay.Unmarshal(rawValue, &bools); err != nil {
 			return err
-		}
-		for _, value := range bools.Items {
-			p.indexBoolValues(boolFields, field.Name, value, event)
 		}
 	} else {
 		value := false
@@ -146,13 +144,12 @@ func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, boolFie
 
 func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, numericFields map[string]Ints, field config.Field, event *Event) error {
 	if isRepeated {
-		ints := dec.Ints{Items: make([]int, 0)}
+		ints := dec.Ints{Callback: func(value int) {
+			p.indexIntValues(numericFields, field.Name, value, event)
+		}}
 		ints.IsQuoted = bytes.Contains(rawValue, []byte(`"`))
 		if err := gojay.Unmarshal(rawValue, &ints); err != nil {
 			return fmt.Errorf("failed due to json unmarshall %s,%w", rawValue, err)
-		}
-		for _, value := range ints.Items {
-			p.indexIntValues(numericFields, field.Name, value, event)
 		}
 	} else {
 		value := 0
@@ -166,12 +163,11 @@ func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, numericF
 
 func (p *Processor) decodeAndIndexText(isRepeated bool, rawValue []byte, textFields map[string]Texts, field config.Field, event *Event) error {
 	if isRepeated {
-		strings := dec.Strings{Items: make([]string, 0)}
+		strings := dec.Strings{Callback: func(value string) {
+			p.indexTextValues(textFields, field.Name, value, event)
+		}}
 		if err := gojay.Unmarshal(rawValue, &strings); err != nil {
 			return err
-		}
-		for _, value := range strings.Items {
-			p.indexTextValues(textFields, field.Name, value, event)
 		}
 	} else {
 		value := ""
@@ -352,8 +348,8 @@ func (p Processor) logBool(logger *log.Logger, values Bools) {
 
 }
 
-//New creates a new processor
-func New(rule *config.Rule) *Processor {
+//NewProcessor creates a new processor
+func NewProcessor(rule *config.Rule) *Processor {
 	return &Processor{Rule: rule,
 		msgProvider: msg.NewProvider(16*1024, rule.Concurrency),
 	}

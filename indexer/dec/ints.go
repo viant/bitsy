@@ -6,15 +6,12 @@ import (
 )
 
 type Ints struct {
-	Items    []int
+	Callback func(value int)
 	IsQuoted bool
 }
 
 // implement UnmarshalerJSONArray
 func (s *Ints) UnmarshalJSONArray(dec *gojay.Decoder) (err error) {
-	if len(s.Items) == 0 {
-		s.Items = make([]int, 0)
-	}
 	value := 0
 	if s.IsQuoted {
 		text := ""
@@ -24,13 +21,13 @@ func (s *Ints) UnmarshalJSONArray(dec *gojay.Decoder) (err error) {
 		if value, err = strconv.Atoi(text); err != nil {
 			return err
 		}
-		s.Items = append(s.Items, value)
+		s.Callback(value)
 		return nil
 
 	}
 	if err := dec.Int(&value); err != nil {
 		return err
 	}
-	s.Items = append(s.Items, value)
+	s.Callback(value)
 	return nil
 }
