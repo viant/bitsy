@@ -1,9 +1,8 @@
 package config
 
 import (
+	"fmt"
 	"github.com/viant/afs/matcher"
-	"github.com/viant/cloudless/data/processor"
-	"github.com/viant/cloudless/resource"
 )
 
 type Field struct {
@@ -22,8 +21,7 @@ type Destination struct {
 }
 
 type Rule struct {
-	SourceURL string
-	processor.Config
+	SourceURL          string
 	TimeField          string
 	BatchField         string
 	SequenceField      string
@@ -32,4 +30,34 @@ type Rule struct {
 	AllowQuotedNumbers bool
 	Dest               Destination
 	Source             matcher.Basic
+}
+
+func (r *Rule) Init() {
+	r.Dest.Init()
+}
+
+func (d *Destination) Init() {
+	if d.URIKeyName == "" {
+		d.URIKeyName = "$fragment"
+	}
+	if d.IntPrefix == "" {
+		d.IntPrefix = "num/"
+	}
+	if d.FloatPrefix == "" {
+		d.FloatPrefix = "float/"
+	}
+	if d.TextPrefix == "" {
+		d.TextPrefix = "text/"
+	}
+	if d.BooleanPrefix == "" {
+		d.BooleanPrefix = "bool/"
+	}
+
+}
+
+func (r *Rule) Validate() error {
+	if len(r.BatchField) == 0 {
+		return fmt.Errorf("batch field is missing")
+	}
+	return nil
 }
