@@ -3,11 +3,15 @@ package indexer
 import "github.com/viant/cloudless/data/processor"
 
 type Reporter struct {
-	processor.Reporter
+	processor.BaseReporter
 }
 
 func NewReporter() *Reporter {
-	return &Reporter{}
+	return &Reporter{
+		BaseReporter: processor.BaseReporter{
+			Response: &processor.Response{Status: processor.StatusOk},
+		},
+	}
 }
 
 

@@ -2,8 +2,12 @@ package config
 
 import (
 	"fmt"
+	"github.com/viant/afs/file"
 	"github.com/viant/afs/matcher"
+	"github.com/viant/afs/url"
+	"path"
 	"strings"
+	"time"
 )
 
 type Field struct {
@@ -22,6 +26,7 @@ type Destination struct {
 }
 
 type Rule struct {
+	Disabled           bool
 	SourceURL          string
 	TimeField          string
 	BatchField         string
@@ -30,7 +35,15 @@ type Rule struct {
 	IndexingFields     []Field
 	AllowQuotedNumbers bool
 	Dest               Destination
-	Source             matcher.Basic
+	When               matcher.Basic
+}
+
+//HasMatch returns true if URL matches prefix or suffix
+func (r *Rule) HasMatch(URL string) bool {
+	location := url.Path(URL)
+	parent, name := path.Split(location)
+	match := r.When.Match(parent, file.NewInfo(name, 0, 0644, time.Now(), false))
+	return match
 }
 
 func (r *Rule) Init() {
@@ -56,7 +69,7 @@ func (d *Destination) Init() {
 
 }
 
-func(d *Destination) Validate() error {
+func (d *Destination) Validate() error {
 	if d.URL == "" {
 		return fmt.Errorf("destination URL was empty")
 	}
@@ -68,7 +81,7 @@ func(d *Destination) Validate() error {
 }
 
 func (r *Rule) Validate() error {
-	err := r.Validate()
+	err := r.Dest.Validate()
 	if err != nil {
 		return err
 	}

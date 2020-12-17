@@ -1,10 +1,10 @@
 source:
-  prefix: /cast001/
+  prefix: /case001/
   suffix: json
 
 dest:
-  URL: mem://localhost/index/cast01/
-  TableRoot: myTable
+  URL: mem://localhost/index/case01/$fragment/data.json
+  TableRoot: myTable_
 
 timeField: ts
 batchField: batchId

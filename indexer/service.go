@@ -16,12 +16,10 @@ type Service struct {
 func (s *Service) Index(ctx context.Context, request *processor.Request) *Reporter {
 	reporter := NewReporter()
 	err := s.index(ctx, request, reporter)
-
 	if err != nil {
 		reporter.BaseResponse().LogError(err)
 	}
-
-	return nil
+	return reporter
 }
 
 func (s *Service) index(ctx context.Context, request *processor.Request, reporter *Reporter) error {
@@ -43,15 +41,16 @@ func (s *Service) index(ctx context.Context, request *processor.Request, reporte
 		})
 		srv.Do(ctx, request)
 		return nil
-
 	default:
 		return fmt.Errorf("too many rules matched %+v", rules)
 
 	}
 }
 
-func New(cfg *config.Config) *Service {
+func New(cfg *config.Config, fs afs.Service) *Service {
+	cfg.Init()
 	return &Service{
 		config: cfg,
+		fs: fs,
 	}
 }

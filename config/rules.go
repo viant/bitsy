@@ -23,7 +23,16 @@ type Rules struct {
 func (r *Rules) Match(URL string) []*Rule {
 	r.mux.RLock()
 	defer r.mux.RUnlock()
-	return nil
+	var result = make([]*Rule, 0)
+	for _, candidate := range r.Indexes {
+		if candidate.HasMatch(URL) {
+			if candidate.Disabled {
+				continue
+			}
+			result = append(result, candidate)
+		}
+	}
+	return result
 }
 
 func (r *Rules) ReloadIfNeeded(ctx context.Context, fs afs.Service) error {
@@ -79,7 +88,9 @@ func (r *Rules) loadRule(ctx context.Context, URL string, fs afs.Service) (*Rule
 	if err != nil {
 		return nil, err
 	}
-
+	if err := r.Config.Init(ctx, fs);err != nil {
+		return nil, err
+	}
 	rule.Init()
 	return rule, rule.Validate()
 }
