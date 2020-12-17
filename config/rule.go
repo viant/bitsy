@@ -15,7 +15,7 @@ type Destination struct {
 	URL           string
 	TableRoot     string
 	TextPrefix    string
-	NumericPrefix string
+	IntPrefix     string
 	FloatPrefix   string
 	URIKeyName    string
 	BooleanPrefix string

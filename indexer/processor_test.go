@@ -30,7 +30,7 @@ func Test_Process(t *testing.T) {
 				Dest: config.Destination{
 					TableRoot:     "test_",
 					TextPrefix:    "text/",
-					NumericPrefix: "num/",
+					IntPrefix:     "num/",
 					FloatPrefix:   "float/",
 					URIKeyName:    "$fragment",
 					BooleanPrefix: "bool/",
@@ -38,7 +38,7 @@ func Test_Process(t *testing.T) {
 				BatchField:    "batch_id",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
-				IndexingFields: []config.Field {
+				IndexingFields: []config.Field{
 					{
 						Name: "name",
 						Type: "string",
@@ -51,8 +51,6 @@ func Test_Process(t *testing.T) {
 						Name: "city_id",
 						Type: "int",
 					},
-
-
 				},
 
 				Config: processor.Config{
@@ -84,7 +82,7 @@ func Test_Process(t *testing.T) {
 					URL:           "",
 					TableRoot:     "test_",
 					TextPrefix:    "text/",
-					NumericPrefix: "num/",
+					IntPrefix:     "num/",
 					FloatPrefix:   "float/",
 					URIKeyName:    "$fragment",
 					BooleanPrefix: "bool/",
@@ -95,7 +93,7 @@ func Test_Process(t *testing.T) {
 				Config: processor.Config{
 					DestinationURL: "mem://localhost/case2/$fragment/data.json",
 				},
-				IndexingFields: []config.Field {
+				IndexingFields: []config.Field{
 					{
 						Name: "segments",
 						Type: "int",
@@ -123,7 +121,7 @@ func Test_Process(t *testing.T) {
 					URL:           "",
 					TableRoot:     "test_",
 					TextPrefix:    "text/",
-					NumericPrefix: "num/",
+					IntPrefix:     "num/",
 					FloatPrefix:   "float/",
 					URIKeyName:    "$fragment",
 					BooleanPrefix: "bool/",
@@ -134,7 +132,7 @@ func Test_Process(t *testing.T) {
 				Config: processor.Config{
 					DestinationURL: "mem://localhost/case2/$fragment/data.json",
 				},
-				IndexingFields: []config.Field {
+				IndexingFields: []config.Field{
 					{
 						Name: "is_pmp",
 						Type: "bool",
@@ -149,6 +147,43 @@ func Test_Process(t *testing.T) {
 				"bool/test_is_pmp/data.json": `{"@indexBy@": "value"}
 {"batch_id":1, "value":true, "events":3 }
 {"batch_id":1, "value":false, "events":4 }
+`,
+			},
+		},
+		{
+			description: "float rows index",
+			Rule: config.Rule{
+				Dest: config.Destination{
+					URL:           "",
+					TableRoot:     "test_",
+					TextPrefix:    "text/",
+					IntPrefix:     "num/",
+					FloatPrefix:   "float/",
+					URIKeyName:    "$fragment",
+					BooleanPrefix: "bool/",
+				},
+				BatchField:    "batch_id",
+				SequenceField: "seq",
+				TimeField:     "tstamp",
+				Config: processor.Config{
+					DestinationURL: "mem://localhost/case4/$fragment/data.json",
+				},
+				IndexingFields: []config.Field{
+					{
+						Name: "cp",
+						Type: "float",
+					},
+				},
+			},
+			expectedURL: "mem://localhost/case4/",
+			input: `{"id": 1, "cp": 1.2E10-5,"batch_id":1, "seq":0, "tstamp":"2020-11-01 01:01:01"}
+{"id": 2, "cp": null,"batch_id":1, "seq":1, "tstamp":"2020-11-01 01:01:01"}
+{"id": 3, "cp": 0.1, "batch_id":1,"seq":2, "tstamp":"2020-11-01 01:01:01"}`,
+			expected: map[string]string{
+				"float/test_cp/data.json": `{"@indexBy@": "value"}
+{"batch_id":1, "value":0.000012, "events":1 }
+{"batch_id":1, "value":0.1, "events":4 }
+{"batch_id":1, "value":0.0, "events":2 }
 `,
 			},
 		},
