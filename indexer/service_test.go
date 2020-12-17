@@ -3,7 +3,6 @@ package indexer
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/viant/afs"
 	"github.com/viant/assertly"
@@ -21,10 +20,10 @@ func TestService_Index(t *testing.T) {
 	parent := toolbox.CallerDirectory(3)
 
 	var useCases = []struct {
-		description string
-		config      *config.Config
-		request     *processor.Request
-		expect      interface{}
+		description  string
+		config       *config.Config
+		request      *processor.Request
+		expect       interface{}
 		expectedData map[string]string
 	}{
 		{
@@ -40,7 +39,6 @@ func TestService_Index(t *testing.T) {
 						ScannerBufferMB: 2,
 					},
 				},
-
 			},
 			request: &processor.Request{
 				SourceURL: "mem://localhost/case002/data.json",
@@ -59,7 +57,7 @@ func TestService_Index(t *testing.T) {
 	"Status": "ok"
 }`,
 			expectedData: map[string]string{
-				"mem://localhost/index/case01/num/myTable_city_id/data.json":`[{"@indexBy@": "value"},
+				"mem://localhost/index/case01/num/myTable_city_id/data.json": `[{"@indexBy@": "value"},
 {"batch_id":1, "value":1, "events":3 },
 {"batch_id":1, "value":2, "events":4 }]`,
 			},
@@ -69,15 +67,12 @@ func TestService_Index(t *testing.T) {
 	fs := afs.New()
 	for _, useCase := range useCases {
 
-
 		ctx := context.Background()
 		srv := New(useCase.config, fs)
 
-
 		response := srv.Index(ctx, useCase.request)
 		assert.NotNil(t, response, useCase.description)
-		fmt.Printf("%+v\n" , response)
-		if ! assertly.AssertValues(t, useCase.expect, response, useCase.description) {
+		if !assertly.AssertValues(t, useCase.expect, response, useCase.description) {
 			toolbox.DumpIndent(response, true)
 		}
 
@@ -85,17 +80,17 @@ func TestService_Index(t *testing.T) {
 			continue
 		}
 		for URL, expect := range useCase.expectedData {
-			actual, err  := fs.DownloadWithURL(ctx, URL)
-			if ! assert.Nil(t, err, useCase.description + " / " + URL) {
+			actual, err := fs.DownloadWithURL(ctx, URL)
+			if !assert.Nil(t, err, useCase.description+" / "+URL) {
 				continue
 			}
-			expectedIndex := []interface{} {}
+			expectedIndex := []interface{}{}
 			err = json.Unmarshal([]byte(expect), &expectedIndex)
-			if ! assert.Nil(t, err, useCase.description + " / " + URL) {
+			if !assert.Nil(t, err, useCase.description+" / "+URL) {
 				continue
 			}
-			if ! assertly.AssertValues(t, expectedIndex, actual, useCase.description + " / " + URL) {
-				toolbox.DumpIndent(actual, true)
+			if !assertly.AssertValues(t, expectedIndex, string(actual), useCase.description+" / "+URL) {
+				toolbox.DumpIndent(expectedIndex, true)
 			}
 
 		}

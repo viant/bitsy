@@ -7,7 +7,7 @@ dest:
   TableRoot: myTable_
 
 timeField: ts
-batchField: batchId
+batchField: batch_id
 sequenceField: seq
 partitionField: part_id
 allowQuotedNumbers: true
