@@ -18,6 +18,7 @@ func Test_Process(t *testing.T) {
 	var useCases = []struct {
 		description string
 		config.Rule
+		config.Rules
 		input       string
 		expectedURL string
 		expected    map[string]string
@@ -26,6 +27,12 @@ func Test_Process(t *testing.T) {
 
 		{
 			description: "multi rows index",
+			Rules: config.Rules{
+				Config: processor.Config{
+					DestinationURL: "mem://localhost/data/$fragment/data.json",
+				},
+			},
+
 			Rule: config.Rule{
 				Dest: config.Destination{
 					TableRoot:     "test_",
@@ -52,10 +59,6 @@ func Test_Process(t *testing.T) {
 						Type: "int",
 					},
 				},
-
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/data/$fragment/data.json",
-				},
 			},
 			expectedURL: "mem://localhost/data/",
 			input: `{"id": 1, "name": "Adam", "country": "us", "city_id":1, "batch_id":1, "seq":0, "tstamp":"2020-11-01 01:01:01"}
@@ -77,6 +80,11 @@ func Test_Process(t *testing.T) {
 		},
 		{
 			description: "repeated rows index",
+			Rules: config.Rules{
+				Config: processor.Config{
+					DestinationURL: "mem://localhost/case2/$fragment/data.json",
+				},
+			},
 			Rule: config.Rule{
 				Dest: config.Destination{
 					URL:           "",
@@ -90,9 +98,6 @@ func Test_Process(t *testing.T) {
 				BatchField:    "batch_id",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/case2/$fragment/data.json",
-				},
 				IndexingFields: []config.Field{
 					{
 						Name: "segments",
@@ -116,6 +121,11 @@ func Test_Process(t *testing.T) {
 		},
 		{
 			description: "boolean rows index",
+			Rules: config.Rules{
+				Config: processor.Config{
+					DestinationURL: "mem://localhost/case2/$fragment/data.json",
+				},
+			},
 			Rule: config.Rule{
 				Dest: config.Destination{
 					URL:           "",
@@ -129,9 +139,6 @@ func Test_Process(t *testing.T) {
 				BatchField:    "batch_id",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/case2/$fragment/data.json",
-				},
 				IndexingFields: []config.Field{
 					{
 						Name: "is_pmp",
@@ -152,6 +159,11 @@ func Test_Process(t *testing.T) {
 		},
 		{
 			description: "float rows index",
+			Rules: config.Rules{
+				Config: processor.Config{
+					DestinationURL: "mem://localhost/case4/$fragment/data.json",
+				},
+			},
 			Rule: config.Rule{
 				Dest: config.Destination{
 					URL:           "",
@@ -165,9 +177,6 @@ func Test_Process(t *testing.T) {
 				BatchField:    "batch_id",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/case4/$fragment/data.json",
-				},
 				IndexingFields: []config.Field{
 					{
 						Name: "cp",
@@ -192,12 +201,11 @@ func Test_Process(t *testing.T) {
 	fs := afs.New()
 
 	for _, useCase := range useCases {
-
 		ctx := context.Background()
-		proc := New(&useCase.Rule)
+		proc := NewProcessor(&useCase.Rule, 10)
 
 		reporter := processor.NewReporter()
-		reporter.BaseResponse().DestinationURL = useCase.Config.ExpandDestinationURL(time.Now())
+		reporter.BaseResponse().DestinationURL = useCase.Rules.ExpandDestinationURL(time.Now())
 
 		ctx, err := proc.Pre(ctx, reporter)
 		if !assert.Nil(t, err, useCase.description) {
