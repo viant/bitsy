@@ -54,7 +54,7 @@ func run(options *Options) error {
 		ReadCloser: reader,
 	})
 	JSON, _ = json.Marshal(response)
-	fmt.Printf("%s\n", response)
+	fmt.Printf("%s\n", JSON)
 	return nil
 }
 
