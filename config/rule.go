@@ -97,5 +97,15 @@ func (r *Rule) Validate() error {
 	if len(r.IndexingFields) == 0 {
 		return fmt.Errorf("indexingFields was empty")
 	}
+
+	for _, field := range r.IndexingFields {
+		switch strings.ToLower(field.Type) {
+		case TypeBool, TypeFloat, TypeInt, TypeString:
+		default:
+			return fmt.Errorf("unsupported data type: '%s', for field: %s, supported: %v", field.Type, field.Name, []string{
+				TypeBool, TypeFloat, TypeInt, TypeString,
+			})
+		}
+	}
 	return nil
 }

@@ -73,24 +73,24 @@ func (p *Processor) indexEvents(events [][]byte, textFields map[string]Texts, nu
 			}
 			isRepeated := bytes.HasPrefix(rawValue, []byte("["))
 			switch strings.ToLower(field.Type) {
-			case "string":
+			case config.TypeString:
 				if err := p.decodeAndIndexText(isRepeated, rawValue, textFields, field, event); err != nil {
 					return err
 				}
-			case "int":
+			case config.TypeInt:
 
 				err := p.decodeAndIndexInt(isRepeated, rawValue, numericFields, field, event)
 				if err != nil {
 					return err
 				}
 
-			case "float":
+			case config.TypeFloat:
 				err := p.decodeAndIndexFloat(isRepeated, rawValue, floatFields, field, event)
 				if err != nil {
 					return err
 				}
 
-			case "bool":
+			case config.TypeBool:
 				err := p.decodeAndIndexBool(isRepeated, rawValue, boolFields, field, event)
 				if err != nil {
 					return err

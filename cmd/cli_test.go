@@ -19,11 +19,10 @@ func TestRunClient(t *testing.T) {
 		{
 			description: " test valid yaml ",
 			args: []string{
-				"", "-V", "-r", path.Join(parent, "test_data/valid.yaml"),
+				"", "-V", "-r", path.Join(parent, "test_data/rule/valid.yaml"),
 			},
 			expected: 0,
 		},
-
 		{
 			description: " generate valid yaml ",
 			args: []string{
@@ -32,7 +31,8 @@ func TestRunClient(t *testing.T) {
 				"-d", "/tmp/bitsy/$fragment/data.json",
 				"-b", "batchId",
 				"-q", "seq",
-				"-i", "x:string,y:int",
+				"-f", "x:string",
+				"-f", "y:int",
 			},
 			expected: 0,
 		},
@@ -46,7 +46,7 @@ func TestRunClient(t *testing.T) {
 		{
 			description: " test im yaml ",
 			args: []string{
-				"", "-r", path.Join(parent, "test_data/valid.yaml"),
+				"", "-r", path.Join(parent, "test_data/rule/valid.yaml"),
 				"-s", path.Join(parent, "test_data/data.json"),
 				"-d", "mem://localhost/tmp/bitsy/$fragment/data.json",
 			},

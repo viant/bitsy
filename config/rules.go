@@ -65,13 +65,13 @@ func (r *Rules) ReloadIfNeeded(ctx context.Context, fs afs.Service) error {
 
 		return
 	})
-	if err != nil || !hasChanged{
+	if err != nil || !hasChanged {
 		return err
 	}
 	//Convert rules to r.Indexes
-	var updatedRules = make([]*Rule,0)
-	for key,_ := range rules {
-		updatedRules = append(updatedRules,rules[key])
+	var updatedRules = make([]*Rule, 0)
+	for key, _ := range rules {
+		updatedRules = append(updatedRules, rules[key])
 	}
 	r.mux.Lock()
 	defer r.mux.Unlock()
@@ -88,9 +88,6 @@ func (r *Rules) loadRule(ctx context.Context, URL string, fs afs.Service) (*Rule
 	if err != nil {
 		return nil, err
 	}
-	if err := r.Config.Init(ctx, fs);err != nil {
-		return nil, err
-	}
 	rule.Init()
 	return rule, rule.Validate()
 }
@@ -98,7 +95,17 @@ func (r *Rules) loadRule(ctx context.Context, URL string, fs afs.Service) (*Rule
 func (r *Rules) Init() {
 	r.Indexes = make([]*Rule, 0)
 	r.Tracker = resource.New(r.BaseURL, time.Duration(r.CheckInMs)*time.Microsecond)
+	if r.MaxExecTimeMs == 0 {
+		r.MaxExecTimeMs = 3600000
+	}
+	if r.ScannerBufferMB == 0 {
+		r.ScannerBufferMB = 2
+	}
+	if r.Concurrency == 0 {
+		r.Concurrency = 100
+	}
 }
+
 
 func (r *Rules) ProcessorConfig(rule *Rule) processor.Config {
 	cfg := r.Config

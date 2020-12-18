@@ -8,6 +8,6 @@ type Options struct {
 	SourceURL      string `short:"s" long:"sourceURL" description:"source URL"`
 	DestinationURL string `short:"d" long:"destinationURL" description:"destination URL"`
 	TimeField      string `short:"t" long:"timeField" description:"time field"`
-	IndexingFields string `short:"i" long:"indexingFields" description:"indexing fields, e.g.: -i x:string,y:int"`
+	IndexingFields map[string]string `short:"f" long:"fields" description:"indexing fields, e.g.: -f x:string -f y:int"`
 	Concurrency    int    `short:"c" long:"concurency" description:"processor concurrency"`
 }

@@ -1,0 +1,15 @@
+when:
+  prefix: /tmp/bitsy/
+  suffix: json.gz
+
+dest:
+  URL: file:///tmp/bitsy/blue/$fragment/data.json
+  TableRoot: myTable_
+
+timeField: ts
+batchField: batch_id
+sequenceField: seq
+allowQuotedNumbers: true
+indexingFields:
+  - Name: bluekai
+    Type: int

@@ -10,8 +10,10 @@ import (
 	"github.com/viant/bitsy/config"
 	"github.com/viant/bitsy/indexer"
 	"github.com/viant/cloudless/data/processor"
+	"github.com/viant/cloudless/ioutil"
 	"math"
 	"os"
+	"time"
 )
 
 const (
@@ -19,8 +21,12 @@ const (
 )
 
 func run(options *Options) error {
-
 	fs := afs.New()
+	rule, err := loadRule(options, fs)
+	if err != nil {
+		return err
+	}
+	reportRule(rule)
 	ctx := context.Background()
 	parentURL, _ := url.Split(options.RuleURL, file.Scheme)
 	cfg := config.Config{
@@ -33,25 +39,26 @@ func run(options *Options) error {
 				RetryURL:         "file:///tmp/bitsy/retry",
 				FailedURL:        "file:///tmp/bitsy/failed",
 				CorruptionURL:    "file:///tmp/bitsy/corrupted",
-				MaxExecTimeMs:    math.MaxInt64,
+				MaxExecTimeMs:    math.MaxInt32,
 			},
 		},
 	}
+	cfg.Init()
 	JSON, _ := json.Marshal(cfg)
 	os.Setenv(configKey, string(JSON))
 	srv, err := indexer.Singleton(ctx, configKey)
 	if err != nil {
 		return err
 	}
-	reader, err := fs.OpenURL(ctx, options.SourceURL)
+	reader, err := ioutil.OpenURL(ctx, fs, options.SourceURL)
 	if err != nil {
 		return err
 	}
-
 	defer reader.Close()
 	response := srv.Index(ctx, &processor.Request{
 		SourceURL:  options.SourceURL,
 		ReadCloser: reader,
+		StartTime: time.Now(),
 	})
 	JSON, _ = json.Marshal(response)
 	fmt.Printf("%s\n", JSON)

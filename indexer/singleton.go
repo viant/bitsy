@@ -24,6 +24,7 @@ func Singleton(ctx context.Context, location string) (*Service, error) {
 			return
 		}
 		service = New(cfg, fs)
+
 	})
 
 	if err != nil {
