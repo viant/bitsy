@@ -11,10 +11,10 @@ func TestRunClient(t *testing.T) {
 
 	parent := toolbox.CallerDirectory(3)
 
-	var useCases = [] struct {
+	var useCases = []struct {
 		description string
-		args []string
-		expected int
+		args        []string
+		expected    int
 	}{
 		{
 			description: " test valid yaml ",
@@ -25,18 +25,19 @@ func TestRunClient(t *testing.T) {
 		},
 
 		{
-			description:" test valid yaml ",
-			args: []string {
-				"" , "-V",
-				"-s" ,path.Join(parent,"test_data/data.json"),
+			description: " generate valid yaml ",
+			args: []string{
+				"", "-V",
+				"-s", path.Join(parent, "test_data/data.json"),
 				"-d", "/tmp/bitsy/$fragment/data.json",
-				"-b","batchId",
-				"-q","seq",
+				"-b", "batchId",
+				"-q", "seq",
+				"-i", "x:string,y:int",
 			},
-			expected :0,
+			expected: 0,
 		},
 		{
-			description: " test valid yaml ",
+			description: " test invalid yaml ",
 			args: []string{
 				"", "-V", "-r", path.Join(parent, "test_data/invalid.yaml"),
 			},
@@ -53,12 +54,10 @@ func TestRunClient(t *testing.T) {
 		},
 	}
 
-
 	for _, useCase := range useCases {
-		actual  := RunClient("",useCase.args)
-		assert.EqualValues(t,useCase.expected,actual,useCase.description)
+		actual := RunClient("", useCase.args)
+		assert.EqualValues(t, useCase.expected, actual, useCase.description)
 
 	}
-
 
 }
