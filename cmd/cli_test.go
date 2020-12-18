@@ -17,11 +17,38 @@ func TestRunClient(t *testing.T) {
 		expected int
 	}{
 		{
+			description: " test valid yaml ",
+			args: []string{
+				"", "-V", "-r", path.Join(parent, "test_data/valid.yaml"),
+			},
+			expected: 0,
+		},
+
+		{
 			description:" test valid yaml ",
 			args: []string {
-				"" , "-V","-r" ,path.Join(parent,"test_data/valid.yaml"),
+				"" , "-V",
+				"-s" ,path.Join(parent,"test_data/data.json"),
+				"-d", "/tmp/bitsy/$fragment/data.json",
+				"-b","batchId",
+				"-q","seq",
+			},
+			expected :0,
 		},
-		expected :0,
+		{
+			description: " test valid yaml ", : []string{
+				"", "-V", "-r", path.Join(parent, "test_data/invalid.yaml"),
+			},
+			expected: 1,
+		},
+		{
+			description: " test im yaml ",
+			args: []string{
+				"", "-r", path.Join(parent, "test_data/valid.yaml"),
+				"-s", path.Join(parent, "test_data/data.json"),
+				"-d", "mem://localhost/tmp/bitsy/$fragment/data.json",
+			},
+			expected: 0,
 		},
 	}
 

@@ -94,5 +94,8 @@ func (r *Rule) Validate() error {
 	if r.When.Prefix =="" {
 		return fmt.Errorf("when.Prefix was empty")
 	}
+	if len(r.IndexingFields) == 0 {
+		return fmt.Errorf("indexingFields was empty")
+	}
 	return nil
 }

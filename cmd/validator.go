@@ -20,5 +20,10 @@ func validate(options *Options) error{
 		return err
 	}
 	rule.Init()
-	return rule.Validate()
+	err = rule.Validate()
+	if err != nil {
+		return err
+	}
+	reportRule(rule)
+	return nil
 }

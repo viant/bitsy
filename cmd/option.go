@@ -8,6 +8,7 @@ type Options struct {
 	SourceURL      string `short:"s" long:"sourceURL" description:"source URL"`
 	DestinationURL string `short:"d" long:"destinationURL" description:"destination URL"`
 	TimeField      string `short:"t" long:"timeField" description:"time field"`
+	Concurrency int  `short:"c" long:"concurency" description:"processor concurrency"`
 }
 
 
