@@ -36,7 +36,8 @@ func TestRunClient(t *testing.T) {
 			expected :0,
 		},
 		{
-			description: " test valid yaml ", : []string{
+			description: " test valid yaml ",
+			args: []string{
 				"", "-V", "-r", path.Join(parent, "test_data/invalid.yaml"),
 			},
 			expected: 1,
