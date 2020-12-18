@@ -91,5 +91,8 @@ func (r *Rule) Validate() error {
 	if r.SequenceField == "" {
 		return fmt.Errorf("sequencefield was empty")
 	}
+	if r.When.Prefix =="" {
+		return fmt.Errorf("when.Prefix was empty")
+	}
 	return nil
 }

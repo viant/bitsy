@@ -9,10 +9,3 @@ dest:
 timeField: ts
 batchField: batch_id
 sequenceField: seq
-partitionField: part_id
-allowQuotedNumbers: true
-indexingFields:
-  - Name: city_id
-    Type: int
-  - Name: name
-    Type: string

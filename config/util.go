@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func loadRule(data []byte, ext string) (*Rule, error) {
+func LoadRule(data []byte, ext string) (*Rule, error) {
 	if ext == "" {
 		return nil, nil
 	}

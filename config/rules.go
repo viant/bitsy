@@ -84,7 +84,7 @@ func (r *Rules) loadRule(ctx context.Context, URL string, fs afs.Service) (*Rule
 	if err != nil {
 		return nil, err
 	}
-	rule, err := loadRule(data, path.Ext(URL))
+	rule, err := LoadRule(data, path.Ext(URL))
 	if err != nil {
 		return nil, err
 	}
