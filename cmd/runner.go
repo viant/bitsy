@@ -27,13 +27,13 @@ func run(options *Options) error {
 		Rules: config.Rules{
 			BaseURL: parentURL,
 			Config: processor.Config{
-				Concurrency:         options.Concurrency,
-				DestinationURL:      options.DestinationURL,
-				DestinationCodec:    "",
-				RetryURL:            "file:///tmp/bitsy/retry",
-				FailedURL:           "file:///tmp/bitsy/failed",
-				CorruptionURL:      "file:///tmp/bitsy/corrupted",
-				MaxExecTimeMs:       math.MaxInt64,
+				Concurrency:      options.Concurrency,
+				DestinationURL:   options.DestinationURL,
+				DestinationCodec: "",
+				RetryURL:         "file:///tmp/bitsy/retry",
+				FailedURL:        "file:///tmp/bitsy/failed",
+				CorruptionURL:    "file:///tmp/bitsy/corrupted",
+				MaxExecTimeMs:    math.MaxInt64,
 			},
 		},
 	}
@@ -50,15 +50,15 @@ func run(options *Options) error {
 
 	defer reader.Close()
 	response := srv.Index(ctx, &processor.Request{
-		SourceURL: options.SourceURL,
+		SourceURL:  options.SourceURL,
 		ReadCloser: reader,
 	})
 	JSON, _ = json.Marshal(response)
-	fmt.Printf("%s\n", response)
+	fmt.Printf("%s\n", JSON)
 	return nil
 }
 
 /*
 	srv := New(useCase.config, fs)
 
- */
+*/
