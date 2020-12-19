@@ -13,8 +13,6 @@ type Config struct {
 	Rules
 }
 
-
-
 //NewConfigFromEnv creates a new config from env
 func NewConfigFromEnv(ctx context.Context, key string) (*Config, error) {
 	data := os.Getenv(key)

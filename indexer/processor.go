@@ -28,10 +28,10 @@ func (p Processor) Pre(ctx context.Context, reporter processor.Reporter) (contex
 
 //Process process data unit (upto 64 rows)
 func (p *Processor) Process(ctx context.Context, data []byte, reporter processor.Reporter) error {
-	intFields := make(map[string]Ints)
-	floatFields := make(map[string]Floats)
-	textFields := make(map[string]Texts)
-	boolFields := make(map[string]Bools)
+	intFields := make([]Ints, len(p.IndexingFields))
+	floatFields := make([]Floats, len(p.IndexingFields))
+	textFields := make([]Texts, len(p.IndexingFields))
+	boolFields := make([]Bools, len(p.IndexingFields))
 	events := bytes.Split(data, []byte{'\n'})
 	err := p.indexEvents(events, textFields, intFields, boolFields, floatFields)
 	if err != nil {
@@ -58,40 +58,51 @@ func (p Processor) Post(ctx context.Context, reporter processor.Reporter) error 
 	return logger.Close()
 }
 
-func (p *Processor) indexEvents(events [][]byte, textFields map[string]Texts, numericFields map[string]Ints, boolFields map[string]Bools, floatFields map[string]Floats) error {
+func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues []Ints, boolFields []Bools, floatFields []Floats) error {
 	for _, eventLine := range events {
 
 		event := NewEvent(p.Rule)
 		if err := gojay.Unmarshal(eventLine, event); err != nil {
 			return processor.NewDataCorruption(fmt.Sprintf("invalid json %v, %s", err, eventLine))
 		}
-
 		for _, field := range event.IndexingFields {
 			rawValue, ok := event.values[field.Name]
 			if !ok {
 				continue
 			}
+
 			isRepeated := bytes.HasPrefix(rawValue, []byte("["))
 			switch strings.ToLower(field.Type) {
 			case config.TypeString:
-				if err := p.decodeAndIndexText(isRepeated, rawValue, textFields, field, event); err != nil {
+				if len(textFields[field.Index]) == 0 {
+					textFields[field.Index] = make(Texts, 1000)
+				}
+				if err := p.decodeAndIndexText(isRepeated, rawValue, textFields[field.Index], event); err != nil {
 					return err
 				}
 			case config.TypeInt:
-
-				err := p.decodeAndIndexInt(isRepeated, rawValue, numericFields, field, event)
+				if len(intValues[field.Index]) == 0 {
+					intValues[field.Index] = make(Ints, 10000)
+				}
+				err := p.decodeAndIndexInt(isRepeated, rawValue,  intValues[field.Index], event)
 				if err != nil {
 					return err
 				}
 
 			case config.TypeFloat:
-				err := p.decodeAndIndexFloat(isRepeated, rawValue, floatFields, field, event)
+				if len(floatFields[field.Index]) == 0 {
+					floatFields[field.Index] = make(Floats, 1000)
+				}
+				err := p.decodeAndIndexFloat(isRepeated, rawValue, floatFields[field.Index], event)
 				if err != nil {
 					return err
 				}
 
 			case config.TypeBool:
-				err := p.decodeAndIndexBool(isRepeated, rawValue, boolFields, field, event)
+				if len(boolFields[field.Index]) == 0 {
+					boolFields[field.Index] = make(Bools, 2)
+				}
+				err := p.decodeAndIndexBool(isRepeated, rawValue, boolFields[field.Index], event)
 				if err != nil {
 					return err
 				}
@@ -106,10 +117,10 @@ func (p *Processor) indexEvents(events [][]byte, textFields map[string]Texts, nu
 	return nil
 }
 
-func (p *Processor) decodeAndIndexFloat(isRepeated bool, rawValue []byte, floatFields map[string]Floats, field config.Field, event *Event) error {
+func (p *Processor) decodeAndIndexFloat(isRepeated bool, rawValue []byte, values Floats, event *Event) error {
 	if isRepeated {
 		floats := dec.Floats{Callback: func(value float64) {
-			p.indexFloatValues(floatFields, field.Name, value, event)
+			p.indexFloatValues(values, value, event)
 		}}
 		if err := gojay.Unmarshal(rawValue, &floats); err != nil {
 			return fmt.Errorf("failed due to json unmarshall %s,%w", rawValue, err)
@@ -119,15 +130,15 @@ func (p *Processor) decodeAndIndexFloat(isRepeated bool, rawValue []byte, floatF
 		if err := gojay.Unmarshal(rawValue, &value); err != nil {
 			return err
 		}
-		p.indexFloatValues(floatFields, field.Name, value, event)
+		p.indexFloatValues(values, value, event)
 	}
 	return nil
 }
 
-func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, boolFields map[string]Bools, field config.Field, event *Event) error {
+func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, values Bools, event *Event) error {
 	if isRepeated {
 		bools := dec.Bools{Callback: func(value bool) {
-			p.indexBoolValues(boolFields, field.Name, value, event)
+			p.indexBoolValues(values, value, event)
 		}}
 		if err := gojay.Unmarshal(rawValue, &bools); err != nil {
 			return err
@@ -137,15 +148,15 @@ func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, boolFie
 		if err := gojay.Unmarshal(rawValue, &value); err != nil {
 			return err
 		}
-		p.indexBoolValues(boolFields, field.Name, value, event)
+		p.indexBoolValues(values, value, event)
 	}
 	return nil
 }
 
-func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, numericFields map[string]Ints, field config.Field, event *Event) error {
+func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, values Ints, event *Event) error {
 	if isRepeated {
 		ints := dec.Ints{Callback: func(value int) {
-			p.indexIntValues(numericFields, field.Name, value, event)
+			p.indexIntValues(values, value, event)
 		}}
 		ints.IsQuoted = bytes.Contains(rawValue, []byte(`"`))
 		if err := gojay.Unmarshal(rawValue, &ints); err != nil {
@@ -156,15 +167,15 @@ func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, numericF
 		if err := gojay.Unmarshal(rawValue, &value); err != nil {
 			return err
 		}
-		p.indexIntValues(numericFields, field.Name, value, event)
+		p.indexIntValues(values, value, event)
 	}
 	return nil
 }
 
-func (p *Processor) decodeAndIndexText(isRepeated bool, rawValue []byte, textFields map[string]Texts, field config.Field, event *Event) error {
+func (p *Processor) decodeAndIndexText(isRepeated bool, rawValue []byte, values Texts, event *Event) error {
 	if isRepeated {
 		strings := dec.Strings{Callback: func(value string) {
-			p.indexTextValues(textFields, field.Name, value, event)
+			p.indexTextValues(values, value, event)
 		}}
 		if err := gojay.Unmarshal(rawValue, &strings); err != nil {
 			return err
@@ -174,14 +185,18 @@ func (p *Processor) decodeAndIndexText(isRepeated bool, rawValue []byte, textFie
 		if err := gojay.Unmarshal(rawValue, &value); err != nil {
 			return err
 		}
-		p.indexTextValues(textFields, field.Name, value, event)
+		p.indexTextValues(values, value, event)
 	}
 	return nil
 }
 
-func (p *Processor) logIndexedTexts(textFields map[string]Texts, multiLogger *destination.MultiLogger) error {
-	for field, values := range textFields {
-		key := p.Rule.Dest.TextPrefix + p.Rule.Dest.TableRoot + field
+func (p *Processor) logIndexedTexts(texts []Texts, multiLogger *destination.MultiLogger) error {
+	for _, field := range p.IndexingFields {
+		values := texts[field.Index]
+		if len(values) == 0 {
+			continue
+		}
+		key := p.Rule.Dest.TextPrefix + p.Rule.Dest.TableRoot + field.Name
 		logger, err := multiLogger.Get(key)
 		if err != nil {
 			return err
@@ -191,9 +206,13 @@ func (p *Processor) logIndexedTexts(textFields map[string]Texts, multiLogger *de
 	return nil
 }
 
-func (p *Processor) logIndexedNumerics(numericFields map[string]Ints, multiLogger *destination.MultiLogger) error {
-	for field, values := range numericFields {
-		key := p.Rule.Dest.IntPrefix + p.Rule.Dest.TableRoot + field
+func (p *Processor) logIndexedNumerics(ints []Ints, multiLogger *destination.MultiLogger) error {
+	for _, field := range p.IndexingFields {
+		values := ints[field.Index]
+		if len(values) == 0 {
+			continue
+		}
+		key := p.Rule.Dest.IntPrefix + p.Rule.Dest.TableRoot + field.Name
 		logger, err := multiLogger.Get(key)
 		if err != nil {
 			return err
@@ -203,9 +222,13 @@ func (p *Processor) logIndexedNumerics(numericFields map[string]Ints, multiLogge
 	return nil
 }
 
-func (p *Processor) logIndexedFloats(floatFields map[string]Floats, multiLogger *destination.MultiLogger) error {
-	for field, values := range floatFields {
-		key := p.Rule.Dest.FloatPrefix + p.Rule.Dest.TableRoot + field
+func (p *Processor) logIndexedFloats(floats []Floats, multiLogger *destination.MultiLogger) error {
+	for _, field := range p.IndexingFields {
+		values := floats[field.Index]
+		if len(values) == 0 {
+			continue
+		}
+		key := p.Rule.Dest.FloatPrefix + p.Rule.Dest.TableRoot + field.Name
 		logger, err := multiLogger.Get(key)
 		if err != nil {
 			return err
@@ -215,10 +238,13 @@ func (p *Processor) logIndexedFloats(floatFields map[string]Floats, multiLogger 
 	return nil
 }
 
-func (p Processor) logIndexedBools(boolFields map[string]Bools, multiLogger *destination.MultiLogger) error {
-
-	for field, values := range boolFields {
-		key := p.Rule.Dest.BooleanPrefix + p.Rule.Dest.TableRoot + field
+func (p Processor) logIndexedBools(bools []Bools, multiLogger *destination.MultiLogger) error {
+	for _, field := range p.IndexingFields {
+		values := bools[field.Index]
+		if len(values) == 0 {
+			continue
+		}
+		key := p.Rule.Dest.BooleanPrefix + p.Rule.Dest.TableRoot + field.Name
 		logger, err := multiLogger.Get(key)
 		if err != nil {
 			return err
@@ -228,13 +254,9 @@ func (p Processor) logIndexedBools(boolFields map[string]Bools, multiLogger *des
 	return nil
 }
 
-func (p *Processor) indexTextValues(textFields map[string]Texts, key string, actual string, event *Event) {
-	if _, ok := textFields[key]; !ok {
-		textFields[key] = Texts{}
-	}
-	textValues := textFields[key]
-	if _, ok := textValues[actual]; !ok {
-		textValues[actual] = &Text{
+func (p *Processor) indexTextValues(values Texts, actual string, event *Event) {
+	if _, ok := values[actual]; !ok {
+		values[actual] = &Text{
 			Base: Base{
 				Event:  event,
 				Events: 0,
@@ -242,17 +264,16 @@ func (p *Processor) indexTextValues(textFields map[string]Texts, key string, act
 			Value: actual,
 		}
 	}
-	textValue := textValues[actual]
+	textValue := values[actual]
 	textValue.Events = textValue.Events | oneBit<<event.Sequence
 }
 
-func (p *Processor) indexIntValues(intFields map[string]Ints, key string, actual int, event *Event) {
-	if _, ok := intFields[key]; !ok {
-		intFields[key] = Ints{}
-	}
-	intValues := intFields[key]
-	if _, ok := intValues[actual]; !ok {
-		intValues[actual] = &Int{
+
+
+
+func (p *Processor) indexIntValues(values Ints, actual int, event *Event) {
+	if _, ok := values[actual]; !ok {
+		values[actual] = &Int{
 			Base: Base{
 				Event:  event,
 				Events: 0,
@@ -260,17 +281,13 @@ func (p *Processor) indexIntValues(intFields map[string]Ints, key string, actual
 			Value: actual,
 		}
 	}
-	intValue := intValues[actual]
+	intValue := values[actual]
 	intValue.Events = intValue.Events | oneBit<<(event.Sequence)
 }
 
-func (p *Processor) indexFloatValues(floatFields map[string]Floats, key string, actual float64, event *Event) {
-	if _, ok := floatFields[key]; !ok {
-		floatFields[key] = Floats{}
-	}
-	floatValues := floatFields[key]
-	if _, ok := floatValues[actual]; !ok {
-		floatValues[actual] = &Float{
+func (p *Processor) indexFloatValues(values Floats, actual float64, event *Event) {
+	if _, ok := values[actual]; !ok {
+		values[actual] = &Float{
 			Base: Base{
 				Event:  event,
 				Events: 0,
@@ -278,15 +295,11 @@ func (p *Processor) indexFloatValues(floatFields map[string]Floats, key string, 
 			Value: actual,
 		}
 	}
-	intValue := floatValues[actual]
+	intValue := values[actual]
 	intValue.Events = intValue.Events | oneBit<<(event.Sequence)
 }
 
-func (p Processor) indexBoolValues(boolFields map[string]Bools, key string, actual bool, event *Event) {
-	if _, ok := boolFields[key]; !ok {
-		boolFields[key] = Bools{}
-	}
-	boolValues := boolFields[key]
+func (p Processor) indexBoolValues(boolValues Bools, actual bool, event *Event) {
 	if _, ok := boolValues[actual]; !ok {
 		boolValues[actual] = &Bool{
 			Base: Base{

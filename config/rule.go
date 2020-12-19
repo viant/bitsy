@@ -11,8 +11,9 @@ import (
 )
 
 type Field struct {
-	Name string
-	Type string
+	Name  string
+	Type  string
+	Index int
 }
 
 type Destination struct {
@@ -33,9 +34,14 @@ type Rule struct {
 	SequenceField      string
 	PartitionField     string
 	IndexingFields     []Field
+	fields             map[string]*Field
 	AllowQuotedNumbers bool
 	Dest               Destination
 	When               matcher.Basic
+}
+
+func (r *Rule) Fields() map[string]*Field {
+	return r.fields
 }
 
 //HasMatch returns true if URL matches prefix or suffix
@@ -48,6 +54,14 @@ func (r *Rule) HasMatch(URL string) bool {
 
 func (r *Rule) Init() {
 	r.Dest.Init()
+	if len(r.IndexingFields) == 0 {
+		return
+	}
+	r.fields = map[string]*Field{}
+	for i, item := range r.IndexingFields {
+		r.IndexingFields[i].Index = i
+		r.fields[item.Name] = &r.IndexingFields[i]
+	}
 }
 
 func (d *Destination) Init() {
@@ -91,7 +105,7 @@ func (r *Rule) Validate() error {
 	if r.SequenceField == "" {
 		return fmt.Errorf("sequencefield was empty")
 	}
-	if r.When.Prefix =="" {
+	if r.When.Prefix == "" {
 		return fmt.Errorf("when.Prefix was empty")
 	}
 	if len(r.IndexingFields) == 0 {
