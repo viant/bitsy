@@ -11,6 +11,7 @@ import (
 	"github.com/viant/cloudless/data/processor/destination"
 	"github.com/viant/tapper/log"
 	"github.com/viant/tapper/msg"
+	"math"
 	"strings"
 )
 
@@ -64,6 +65,12 @@ func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues [
 		event := NewEvent(p.Rule)
 		if err := gojay.Unmarshal(eventLine, event); err != nil {
 			return processor.NewDataCorruption(fmt.Sprintf("invalid json %v, %s", err, eventLine))
+		}
+		if event.BatchID == math.MinInt64 {
+			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' batch field: %s", p.BatchField,  eventLine))
+		}
+		if event.Sequence == math.MinInt64 {
+			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' seq field: %s", p.SequenceField,  eventLine))
 		}
 		for _, field := range event.IndexingFields {
 			rawValue, ok := event.values[field.Name]

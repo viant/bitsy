@@ -4,6 +4,7 @@ import (
 	"github.com/francoispqt/gojay"
 	"github.com/viant/bitsy/config"
 	"github.com/viant/bitsy/safe"
+	"math"
 )
 
 type Event struct {
@@ -56,6 +57,8 @@ func (e *Event) NKeys() int {
 func NewEvent(rule *config.Rule) *Event {
 	result := &Event{
 		Rule:   rule,
+		BatchID: math.MinInt64,
+		Sequence:  math.MinInt64,
 		values: make(map[string][]byte),
 		keys:   2 + len(rule.IndexingFields),
 	}
