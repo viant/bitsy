@@ -104,6 +104,9 @@ func autodetectIndexingFields(ctx context.Context, options *Options, fs afs.Serv
 			indexingFields[key] = config.TypeString
 		}
 	}
+	if options.Compress {
+
+	}
 	rule.IndexingFields = decodeIndexingFields(indexingFields)
 	return nil
 }

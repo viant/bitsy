@@ -24,6 +24,7 @@ type Destination struct {
 	FloatPrefix   string
 	URIKeyName    string
 	BooleanPrefix string
+	Codec         string
 }
 
 type Rule struct {
@@ -61,6 +62,13 @@ func (r *Rule) Init() {
 	for i, item := range r.IndexingFields {
 		r.IndexingFields[i].Index = i
 		r.fields[item.Name] = &r.IndexingFields[i]
+	}
+
+	if r.Dest.Codec == "gzip" && ! strings.HasSuffix(r.Dest.URL, ".gz") {
+		r.Dest.URL += ".gz"
+	}
+	if strings.HasSuffix(r.Dest.URL, ".gz") && r.Dest.Codec == "" {
+		r.Dest.Codec = "gzip"
 	}
 }
 

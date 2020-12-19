@@ -6,7 +6,6 @@ import (
 	"github.com/viant/afs"
 	"github.com/viant/bitsy/config"
 	"github.com/viant/cloudless/data/processor"
-	"github.com/viant/toolbox"
 )
 
 type Service struct {
@@ -40,8 +39,6 @@ func (s *Service) index(ctx context.Context, request *processor.Request, reporte
 
 		cfg := s.config.ProcessorConfig(rules[0])
 		proc := NewProcessor(rules[0],s.config.Concurrency)
-		toolbox.DumpIndent(cfg, true)
-
 		srv := processor.New(&cfg, s.fs, proc, func() processor.Reporter {
 			return reporter
 		})

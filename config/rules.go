@@ -110,6 +110,7 @@ func (r *Rules) Init() {
 func (r *Rules) ProcessorConfig(rule *Rule) processor.Config {
 	cfg := r.Config
 	cfg.DestinationURL = rule.Dest.URL
+	cfg.DestinationCodec = rule.Dest.Codec
 	cfg.BatchSize = 64
 	cfg.Sort.Format = "json"
 	cfg.Sort.Batch = true
