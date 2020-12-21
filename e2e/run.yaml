@@ -23,6 +23,6 @@ pipeline:
       action: run
       request: '@app/app'
 
-#  test:
-#    action: run
-#    request: '@regression/regression'
+  test:
+    action: run
+    request: '@regression/regression'

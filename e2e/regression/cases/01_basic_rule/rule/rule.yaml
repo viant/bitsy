@@ -1,18 +1,21 @@
 when:
-  prefix: /data/
+  prefix: "/data/case${parentIndex}/"
   suffix: json
 
 dest:
-  URL: gs:/index/case01/$fragment/data.json
+  URL: gs://${operationBucket}/${appName}/index/case${parentIndex}/$fragment/data.json
   TableRoot: myTable_
 
 timeField: ts
 batchField: batch_id
 sequenceField: seq
-partitionField: part_id
 allowQuotedNumbers: true
 indexingFields:
-  - Name: city_id
+  - Name: field1
     Type: int
-  - Name: name
-    Type: string
+  - Name: field2
+    Type: int
+  - Name: field3
+    Type: int
+
+OnDone: delete
