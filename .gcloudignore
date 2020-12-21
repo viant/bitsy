@@ -4,10 +4,5 @@ e2e/
 .gcloudignore
 .git
 .gitignore
-deployment/
-deployment
-main
-go.mod
-go.sum
-cmd
-cmd/
+
+

@@ -74,7 +74,7 @@ func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues [
 		}
 		for _, field := range event.IndexingFields {
 			rawValue, ok := event.values[field.Name]
-			if !ok {
+			if !ok || len(rawValue) ==0 {
 				continue
 			}
 
