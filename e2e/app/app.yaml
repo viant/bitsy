@@ -1,0 +1,39 @@
+init:
+  config: $Cat(app/config.json)
+  appPath: $Pwd(./..)
+
+pipeline:
+  deploy:
+    setSdk:
+      action: sdk:set
+      target: $target
+      sdk: go:1.15
+
+    build:
+      action: exec:run
+      target: $target
+      sleepTimeMs: 1500
+      checkError: true
+      commands:
+        - cd ${appPath}
+        - unset GOPATH
+        - go mod vendor
+        - go build
+
+    deploy:
+      action: gcp/cloudfunctions:deploy
+      availableMemoryMb: 512
+      timeout: 540s
+      maxInstances: 20
+      region: us-central1
+      '@name': $appName
+      entryPoint: HandleEvent
+      credentials: $gcpCredentials
+      environmentVariables:
+        CONFIG: $AsJSON($config)
+      runtime: go113
+      eventTrigger:
+        eventType: google.storage.object.finalize
+        resource: projects/_/buckets/${triggerBucket}
+      source:
+        URL: ${appPath}

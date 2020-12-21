@@ -1,0 +1,37 @@
+init:
+  doneCounter: 0
+  parentIndex: ${parent.index}
+
+pipeline:
+  cleanUp:
+    action: storage:remove
+    sleepTimeMs: 1000
+    assets:
+      - URL: 'gs://${configBucket}/${appName}/_.cache'
+        credentials: $gcpCredentials
+      - URL: 'gs://${configBucket}/${appName}/Rules/case_${parent.index}/'
+        credentials: $gcpCredentials
+
+  setupRule:
+    action: storage:copy
+    expand: true
+    source:
+      URL: ${parent.path}/rule/
+    dest:
+      credentials: $gcpCredentials
+      URL: gs://${configBucket}/${appName}/Rules/case_${parent.index}
+
+  trigger:
+    action: storage:copy
+    source:
+      URL: ${parent.path}/data/trigger/
+    dest:
+      URL: gs://${triggerBucket}/data/case${parent.index}/
+      credentials: $gcpCredentials
+
+#  validate:
+#    check-db:
+#      ${appName}:
+#        action: dsunit:expect
+#        datastore: ${appName}
+#        URL:  ${parent.path}/${appName}/expect

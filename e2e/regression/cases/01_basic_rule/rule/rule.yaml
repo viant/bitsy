@@ -1,0 +1,18 @@
+when:
+  prefix: /data/
+  suffix: json
+
+dest:
+  URL: gs:/index/case01/$fragment/data.json
+  TableRoot: myTable_
+
+timeField: ts
+batchField: batch_id
+sequenceField: seq
+partitionField: part_id
+allowQuotedNumbers: true
+indexingFields:
+  - Name: city_id
+    Type: int
+  - Name: name
+    Type: string

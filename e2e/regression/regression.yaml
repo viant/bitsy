@@ -1,0 +1,13 @@
+pipeline:
+  init:
+    action: print
+    message: init ...
+  tasksX:
+    tag: $pathMatch
+    range: 1..01
+    description: '@desc'
+    subPath: cases/${index}_*
+    template:
+      test:
+        action: run
+        request: '@test'

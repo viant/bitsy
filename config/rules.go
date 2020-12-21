@@ -13,9 +13,9 @@ import (
 
 type Rules struct {
 	processor.Config
-	BaseURL   string
-	CheckInMs int
-	Indexes   []*Rule
+	BaseURL          string
+	CheckFrequencyMs int
+	Indexes          []*Rule
 	*resource.Tracker
 	mux sync.RWMutex
 }
@@ -94,7 +94,7 @@ func (r *Rules) loadRule(ctx context.Context, URL string, fs afs.Service) (*Rule
 
 func (r *Rules) Init() {
 	r.Indexes = make([]*Rule, 0)
-	r.Tracker = resource.New(r.BaseURL, time.Duration(r.CheckInMs)*time.Microsecond)
+	r.Tracker = resource.New(r.BaseURL, time.Duration(r.CheckFrequencyMs)*time.Microsecond)
 	if r.MaxExecTimeMs == 0 {
 		r.MaxExecTimeMs = 3600000
 	}
@@ -104,6 +104,10 @@ func (r *Rules) Init() {
 	if r.Concurrency == 0 {
 		r.Concurrency = 100
 	}
+	if r.CheckFrequencyMs == 0 {
+		r.CheckFrequencyMs = 60000
+	}
+
 }
 
 

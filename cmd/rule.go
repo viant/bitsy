@@ -32,9 +32,6 @@ func reportRule(rule *config.Rule) {
 	}
 }
 
-
-
-
 func buildRule(options *Options) error {
 	fs := afs.New()
 	ctx := context.Background()
@@ -48,8 +45,6 @@ func buildRule(options *Options) error {
 		},
 		BatchField:    options.BatchField,
 		SequenceField: options.SequenceField,
-
-
 		IndexingFields: decodeIndexingFields(options.IndexingFields),
 		When: matcher.Basic{
 			Prefix: prefix,

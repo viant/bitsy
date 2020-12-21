@@ -1,0 +1,11 @@
+pipeline:
+  init:
+    action: print
+    message: init system
+  setupBucket:
+    triggerBucket:
+      isDir: true
+      action: storage:create
+      dest:
+        URL: gs://${triggerBucket}/
+        credentials: $gcpCredentials

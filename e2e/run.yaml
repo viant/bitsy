@@ -1,0 +1,28 @@
+init:
+  appName: Bitsy
+  gcpCredentials: viant-e2e
+  gcp: ${secrets.$gcpCredentials}
+  projectID: ${gcp.ProjectID}
+  ns: $Replace($projectID,'-','_')
+  triggerBucket: ${ns}_bitsy
+  operationBucket: ${ns}_operation
+  configBucket: ${ns}_config
+
+
+  target:
+    URL: scp://127.0.0.1
+    Credentials: localhost
+
+pipeline:
+  init:
+    system:
+      action: run
+      request: '@system'
+
+    app:
+      action: run
+      request: '@app/app'
+
+#  test:
+#    action: run
+#    request: '@regression/regression'

@@ -1,0 +1,13 @@
+e2e
+e2e/
+.idea
+.gcloudignore
+.git
+.gitignore
+deployment/
+deployment
+main
+go.mod
+go.sum
+cmd
+cmd/

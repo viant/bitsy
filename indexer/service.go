@@ -28,7 +28,6 @@ func (s *Service) index(ctx context.Context, request *processor.Request, reporte
 		return err
 	}
 
-
 	rules := s.config.Match(request.SourceURL)
 	switch len(rules) {
 
