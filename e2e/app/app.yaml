@@ -22,7 +22,7 @@ pipeline:
 
     deploy:
       action: gcp/cloudfunctions:deploy
-      availableMemoryMb: 512
+      availableMemoryMb: 4096
       timeout: 540s
       maxInstances: 20
       region: us-central1

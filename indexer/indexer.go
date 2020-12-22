@@ -6,14 +6,9 @@ import (
 	"fmt"
 	"github.com/viant/afs"
 	"github.com/viant/cloudless/data/processor/adapter/gcp"
-	"time"
 )
 
 func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
-	started := time.Now()
-	defer func() {
-		fmt.Printf("%v: timeTaken: %s\n", event.URL(), time.Now().Sub(started))
-	}()
 	fs := afs.New()
 	service, err := Singleton(ctx, ConfigKey)
 	if err != nil {
@@ -25,8 +20,8 @@ func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
 		fmt.Printf("build request error: %v\n", err)
 		return nil
 	}
-	report := service.Index(ctx, request)
-	jReport, _ := json.Marshal(report)
-	fmt.Printf("%s\n", jReport)
+	resp := service.Index(ctx, request)
+	JSON, _:= json.Marshal(resp)
+	fmt.Printf("%s\n", JSON)
 	return nil
 }
