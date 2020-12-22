@@ -70,7 +70,7 @@ func (r *Rules) ReloadIfNeeded(ctx context.Context, fs afs.Service) error {
 	}
 	//Convert rules to r.Indexes
 	var updatedRules = make([]*Rule, 0)
-	for key, _ := range rules {
+	for key := range rules {
 		updatedRules = append(updatedRules, rules[key])
 	}
 	r.mux.Lock()
@@ -109,7 +109,6 @@ func (r *Rules) Init() {
 	}
 
 }
-
 
 func (r *Rules) ProcessorConfig(rule *Rule) processor.Config {
 	cfg := r.Config

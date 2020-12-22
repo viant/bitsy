@@ -1,9 +1,8 @@
 package config
 
-
 const (
 	TypeString = "string"
-	TypeInt = "int"
-	TypeFloat = "float"
-	TypeBool = "bool"
+	TypeInt    = "int"
+	TypeFloat  = "float"
+	TypeBool   = "bool"
 )

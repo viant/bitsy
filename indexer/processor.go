@@ -67,14 +67,14 @@ func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues [
 			return processor.NewDataCorruption(fmt.Sprintf("invalid json %v, %s", err, eventLine))
 		}
 		if event.BatchID == math.MinInt64 {
-			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' batch field: %s", p.BatchField,  eventLine))
+			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' batch field: %s", p.BatchField, eventLine))
 		}
 		if event.Sequence == math.MinInt64 {
-			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' seq field: %s", p.SequenceField,  eventLine))
+			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' seq field: %s", p.SequenceField, eventLine))
 		}
 		for _, field := range event.IndexingFields {
 			rawValue, ok := event.values[field.Name]
-			if !ok || len(rawValue) ==0 {
+			if !ok || len(rawValue) == 0 {
 				continue
 			}
 
@@ -91,7 +91,7 @@ func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues [
 				if len(intValues[field.Index]) == 0 {
 					intValues[field.Index] = make(Ints, 10000)
 				}
-				err := p.decodeAndIndexInt(isRepeated, rawValue,  intValues[field.Index], event)
+				err := p.decodeAndIndexInt(isRepeated, rawValue, intValues[field.Index], event)
 				if err != nil {
 					return err
 				}
@@ -274,9 +274,6 @@ func (p *Processor) indexTextValues(values Texts, actual string, event *Event) {
 	textValue := values[actual]
 	textValue.Events = textValue.Events | oneBit<<event.Sequence
 }
-
-
-
 
 func (p *Processor) indexIntValues(values Ints, actual int, event *Event) {
 	if _, ok := values[actual]; !ok {

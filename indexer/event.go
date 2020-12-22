@@ -46,21 +46,17 @@ func (e *Event) UnmarshalJSONObject(dec *gojay.Decoder, key string) (err error) 
 	return nil
 }
 
-
-
-
 func (e *Event) NKeys() int {
 	return e.keys
 }
 
-
 func NewEvent(rule *config.Rule) *Event {
 	result := &Event{
-		Rule:   rule,
-		BatchID: math.MinInt64,
-		Sequence:  math.MinInt64,
-		values: make(map[string][]byte),
-		keys:   2 + len(rule.IndexingFields),
+		Rule:     rule,
+		BatchID:  math.MinInt64,
+		Sequence: math.MinInt64,
+		values:   make(map[string][]byte),
+		keys:     2 + len(rule.IndexingFields),
 	}
 	for _, field := range rule.IndexingFields {
 		result.values[field.Name] = make([]byte, 0)

@@ -64,7 +64,7 @@ func (r *Rule) Init() {
 		r.fields[item.Name] = &r.IndexingFields[i]
 	}
 
-	if r.Dest.Codec == "gzip" && ! strings.HasSuffix(r.Dest.URL, ".gz") {
+	if r.Dest.Codec == "gzip" && !strings.HasSuffix(r.Dest.URL, ".gz") {
 		r.Dest.URL += ".gz"
 	}
 	if strings.HasSuffix(r.Dest.URL, ".gz") && r.Dest.Codec == "" {

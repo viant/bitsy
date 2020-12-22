@@ -37,7 +37,7 @@ func (s *Service) index(ctx context.Context, request *processor.Request, reporte
 	case 1:
 
 		cfg := s.config.ProcessorConfig(rules[0])
-		proc := NewProcessor(rules[0],s.config.Concurrency)
+		proc := NewProcessor(rules[0], s.config.Concurrency)
 		srv := processor.New(&cfg, s.fs, proc, func() processor.Reporter {
 			return reporter
 		})
@@ -53,6 +53,6 @@ func New(cfg *config.Config, fs afs.Service) *Service {
 	cfg.Init()
 	return &Service{
 		config: cfg,
-		fs: fs,
+		fs:     fs,
 	}
 }

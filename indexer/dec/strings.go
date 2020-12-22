@@ -5,6 +5,7 @@ import "github.com/francoispqt/gojay"
 type Strings struct {
 	Callback func(value string)
 }
+
 // implement UnmarshalerJSONArray
 func (s *Strings) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	value := ""

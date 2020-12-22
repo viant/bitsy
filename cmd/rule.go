@@ -43,8 +43,8 @@ func buildRule(options *Options) error {
 		Dest: config.Destination{
 			URL: options.DestinationURL,
 		},
-		BatchField:    options.BatchField,
-		SequenceField: options.SequenceField,
+		BatchField:     options.BatchField,
+		SequenceField:  options.SequenceField,
 		IndexingFields: decodeIndexingFields(options.IndexingFields),
 		When: matcher.Basic{
 			Prefix: prefix,
@@ -52,7 +52,7 @@ func buildRule(options *Options) error {
 		},
 	}
 
-	if options.SourceURL != "" && len(rule.IndexingFields) ==0 {
+	if options.SourceURL != "" && len(rule.IndexingFields) == 0 {
 		err := autodetectIndexingFields(ctx, options, fs, rule)
 		if err != nil {
 			return err
@@ -64,14 +64,13 @@ func buildRule(options *Options) error {
 	return fs.Upload(ctx, options.RuleURL, file.DefaultFileOsMode, bytes.NewReader(data))
 }
 
-
-func autodetectIndexingFields(ctx context.Context, options *Options, fs afs.Service,  rule *config.Rule) error {
+func autodetectIndexingFields(ctx context.Context, options *Options, fs afs.Service, rule *config.Rule) error {
 	data, err := fs.DownloadWithURL(ctx, options.SourceURL)
 	if err != nil {
 		return fmt.Errorf("failed to get source file: %v, %w", options.SourceURL, err)
 	}
 	aMap := map[string]interface{}{}
-	if err := json.Unmarshal(data, &aMap);err != nil {
+	if err := json.Unmarshal(data, &aMap); err != nil {
 		return err
 	}
 	var indexingFields = make(map[string]string)
@@ -105,8 +104,6 @@ func autodetectIndexingFields(ctx context.Context, options *Options, fs afs.Serv
 	rule.IndexingFields = decodeIndexingFields(indexingFields)
 	return nil
 }
-
-
 
 func decodeIndexingFields(indexingFields map[string]string) []config.Field {
 	fields := make([]config.Field, 0)

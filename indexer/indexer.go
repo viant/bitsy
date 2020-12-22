@@ -21,7 +21,7 @@ func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
 		return nil
 	}
 	resp := service.Index(ctx, request)
-	JSON, _:= json.Marshal(resp)
+	JSON, _ := json.Marshal(resp)
 	fmt.Printf("%s\n", JSON)
 	return nil
 }

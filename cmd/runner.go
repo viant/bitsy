@@ -58,7 +58,7 @@ func run(options *Options) error {
 	response := srv.Index(ctx, &processor.Request{
 		SourceURL:  options.SourceURL,
 		ReadCloser: reader,
-		StartTime: time.Now(),
+		StartTime:  time.Now(),
 	})
 	JSON, _ = json.Marshal(response)
 	fmt.Printf("%s\n", JSON)

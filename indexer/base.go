@@ -2,5 +2,5 @@ package indexer
 
 type Base struct {
 	*Event
-	Events    int64
+	Events int64
 }

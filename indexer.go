@@ -7,7 +7,5 @@ import (
 )
 
 func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
-	return indexer.HandleEvent(ctx,event)
+	return indexer.HandleEvent(ctx, event)
 }
-
-

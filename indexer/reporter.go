@@ -13,5 +13,3 @@ func NewReporter() *Reporter {
 		},
 	}
 }
-
-

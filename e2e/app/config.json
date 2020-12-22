@@ -1,6 +1,6 @@
 {
-  "DeadlineReductionMs": 16000,
-  "LoaderDeadlineLagMs": 1000,
+  "DeadlineReductionMs": 70000,
+  "LoaderDeadlineLagMs": 5000,
   "MaxRetries": 5,
   "Concurrency": 100,
   "RetryURL": "gs://${triggerBucket}/",
