@@ -6,9 +6,14 @@ import (
 	"fmt"
 	"github.com/viant/afs"
 	"github.com/viant/cloudless/data/processor/adapter/gcp"
+	"time"
 )
 
 func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
+	started := time.Now()
+	defer func() {
+		fmt.Printf("%v: timeTaken: %s\n", event.URL(), time.Now().Sub(started))
+	}()
 	fs := afs.New()
 	service, err := Singleton(ctx, ConfigKey)
 	if err != nil {

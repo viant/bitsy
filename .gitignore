@@ -2,5 +2,3 @@
 .idea/
 *.zip
 local_test.go
-go.mod
-go.sum

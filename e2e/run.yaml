@@ -8,7 +8,6 @@ init:
   operationBucket: ${ns}_operation
   configBucket: ${ns}_config
 
-
   target:
     URL: scp://127.0.0.1
     Credentials: localhost
