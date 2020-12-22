@@ -1,12 +1,12 @@
 {
-  "DeadlineReductionMs": 70000,
+  "DeadlineReductionMs": 10000,
   "LoaderDeadlineLagMs": 5000,
   "MaxRetries": 5,
   "Concurrency": 100,
   "RetryURL": "gs://${triggerBucket}/",
   "FailedURL": "gs://${operationBucket}/${appName}/failed",
   "CorruptionURL": "gs://${operationBucket}/${appName}/corrupted",
-  "MaxExecTimeMs": 540000,
+  "MaxExecTimeMs": 50000,
   "BaseURL" : "gs://${configBucket}/${appName}/Rules",
   "CheckFrequencyMs" : 100
 }
