@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/viant/afs"
 	"github.com/viant/afs/cache"
+	"github.com/viant/afs/file"
+	"github.com/viant/afs/url"
 	"github.com/viant/bitsy/config"
 	"github.com/viant/cloudless/data/processor"
 )
@@ -53,9 +55,10 @@ func (s *Service) index(ctx context.Context, request *processor.Request, reporte
 
 func New(cfg *config.Config, fs afs.Service) *Service {
 	cfg.Init()
+	URL,_ := url.Split(cfg.BaseURL,file.Scheme)
 	return &Service{
 		config: cfg,
 		fs:     fs,
-		cfs:    cache.Singleton(cfg.BaseURL),
+		cfs:    cache.Singleton(URL),
 	}
 }
