@@ -1,6 +1,20 @@
 init:
-  config: $Cat(app/config.json)
+  appName: Bitsy
   appPath: $Pwd(./..)
+  '!region': $params.region
+  '!gcpCredentials': $params.authWith
+  gcp: ${secrets.$gcpCredentials}
+  projectID: $gcp.ProjectID
+  prefix: $Replace(${projectID},'-','_')
+  configBucket: ${prefix}_config
+  triggerBucket: ${prefix}_bitsy
+  opsBucket: ${prefix}_operation
+
+  target:
+    URL: ssh://127.0.0.1/
+    credentials: localhost
+
+  config: $LoadJSON(config.json)
 
 pipeline:
   deploy:
@@ -8,14 +22,6 @@ pipeline:
       action: sdk:set
       target: $target
       sdk: go:1.15
-
-  setupBuckets:
-    triggerBucket:
-      isDir: true
-      action: storage:create
-      dest:
-        URL: gs://${triggerBucket}/
-        credentials: $gcpCredentials
 
     build:
       action: exec:run
@@ -33,7 +39,7 @@ pipeline:
       availableMemoryMb: 4096
       timeout: 540s
       maxInstances: 20
-      region: us-central1
+      region: $region
       '@name': $appName
       entryPoint: HandleEvent
       credentials: $gcpCredentials
