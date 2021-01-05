@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/viant/afs"
+	"github.com/viant/afs/cache"
+	"github.com/viant/afs/file"
+	"github.com/viant/afs/url"
 	"github.com/viant/bitsy/config"
 	"github.com/viant/cloudless/data/processor"
 )
@@ -11,6 +14,7 @@ import (
 type Service struct {
 	config *config.Config
 	fs     afs.Service
+	cfs    afs.Service
 }
 
 func (s *Service) Index(ctx context.Context, request *processor.Request) *Reporter {
@@ -23,7 +27,7 @@ func (s *Service) Index(ctx context.Context, request *processor.Request) *Report
 }
 
 func (s *Service) index(ctx context.Context, request *processor.Request, reporter *Reporter) error {
-	err := s.config.ReloadIfNeeded(ctx, s.fs)
+	err := s.config.ReloadIfNeeded(ctx, s.cfs)
 	if err != nil {
 		return err
 	}
@@ -51,8 +55,10 @@ func (s *Service) index(ctx context.Context, request *processor.Request, reporte
 
 func New(cfg *config.Config, fs afs.Service) *Service {
 	cfg.Init()
+	URL,_ := url.Split(cfg.BaseURL,file.Scheme)
 	return &Service{
 		config: cfg,
 		fs:     fs,
+		cfs:    cache.Singleton(URL),
 	}
 }

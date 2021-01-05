@@ -3,7 +3,6 @@ package indexer
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/viant/afs"
 	"github.com/viant/assertly"
@@ -38,6 +37,7 @@ func TestService_Index(t *testing.T) {
 						CorruptionURL:   "mem://localhost/bitsy/corrupted",
 						MaxExecTimeMs:   120000,
 						ScannerBufferMB: 2,
+						MaxRetries:      2,
 					},
 				},
 			},
@@ -74,7 +74,6 @@ func TestService_Index(t *testing.T) {
 		response := srv.Index(ctx, useCase.request)
 		assert.NotNil(t, response, useCase.description)
 		if !assertly.AssertValues(t, useCase.expect, response, useCase.description) {
-			fmt.Printf("actual %v\n", response)
 			toolbox.DumpIndent(response, true)
 		}
 

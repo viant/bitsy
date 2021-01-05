@@ -1,5 +1,5 @@
 {
-  "DeadlineReductionMs": 70000,
+  "DeadlineReductionMs": 60000,
   "LoaderDeadlineLagMs": 5000,
   "MaxRetries": 5,
   "Concurrency": 100,

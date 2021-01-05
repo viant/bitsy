@@ -1,0 +1,38 @@
+init:
+  parentIndex: ${parent.index}
+
+pipeline:
+  cleanUp:
+    action: storage:remove
+    sleepTimeMs: 1000
+    assets:
+      - URL: 'gs://${configBucket}/${appName}/_.cache'
+        credentials: $gcpCredentials
+      - URL: 'gs://${configBucket}/${appName}/Rules/case_${parent.index}/'
+        credentials: $gcpCredentials
+
+  setupRule:
+    action: storage:copy
+    expand: true
+    source:
+      URL: ${parent.path}/rule/
+    dest:
+      credentials: $gcpCredentials
+      URL: gs://${configBucket}/${appName}/Rules/case_${parent.index}
+
+  trigger:
+    action: storage:copy
+    source:
+      URL: ${parent.path}/data/trigger/
+    dest:
+      URL: gs://${triggerBucket}/data/case${parent.index}/
+      credentials: $gcpCredentials
+    sleepTimeMs: 15000
+
+  check:
+    action: storage:exists
+    assets:
+      - URL: gs://${operationBucket}/${appName}/index/case${parentIndex}/num/myTable_field1/data.json
+        credentials: $gcpCredentials
+    expect:
+      'gs://${operationBucket}/${appName}/index/case${parentIndex}/num/myTable_field1/data.json': true
