@@ -19,9 +19,9 @@ therefore.  Indexing is implemented as a Google cloud function and uses rules to
 
 A typical workflow happens as follows:  
 
-- export the source data indexing columns along with the batch id column and a timestamp
+- export the source data indexing columns along with the batch id column and a timestamp in the json format.
 
-- index data (bitsy).  
+- index data source (bitsy) and save the output in the json format.
 
 - import index data into a table (one per each index) for subsequent use in SQL conditional 
 expressions.
@@ -45,26 +45,39 @@ An indexing rule is specified in the yaml format.  A typical rule may look like 
 
 ```yaml
 when:
-  prefix: "/data/"
+  prefix: /Users/
   suffix: json
 
 dest:
-  URL: gs://bucket/index/$fragment/data.json
+  URL: mem://localhost/index/case01/$fragment/data.json
   TableRoot: myTable_
 
 timeField: ts
 batchField: batch_id
 sequenceField: seq
+partitionField: part_id
 allowQuotedNumbers: true
 indexingFields:
   - Name: city_id
     Type: int
   - Name: name
     Type: string
-
-OnDone: delete
 ```
 
 ## Bitsy CLI
+
+Provided CLI allows to:
+
+```bash
+# Show usage:
+./bitsy -h
+
+# Validate a rule
+./bitsy -V -r valid.yaml
+
+# Genarate a rule
+./bitsy -s test_data/data.json -d /tmp/bitsy/$fragment/data.json    -b batchId  -q seq  -f x:string  -f y:int
+```
+
 
 
