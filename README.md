@@ -79,5 +79,13 @@ Provided CLI allows to:
 ./bitsy -s test_data/data.json -d /tmp/bitsy/$fragment/data.json    -b batchId  -q seq  -f x:string  -f y:int
 ```
 
+## SQL example
 
+```sql
+select * from t1
+where EXISTS (SELECT 1 FROM t1_idx WHERE value IN ('idx1', 'idx2') AND t1.batch_id = t1_idx.batch_id and  AND t1_idx.events & (1 << t1.seq) != 0)
+```
 
+- table t1_idx contains the generated index
+- column t1_idx.value contains index values
+- column t1_idx.events contains bitsets
