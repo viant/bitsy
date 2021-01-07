@@ -77,7 +77,7 @@ func (d *Destination) Init() {
 		d.URIKeyName = "$fragment"
 	}
 	if d.IntPrefix == "" {
-		d.IntPrefix = "num/"
+		d.IntPrefix = "int/"
 	}
 	if d.FloatPrefix == "" {
 		d.FloatPrefix = "float/"

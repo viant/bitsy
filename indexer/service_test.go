@@ -58,7 +58,7 @@ func TestService_Index(t *testing.T) {
 	"Status": "ok"
 }`,
 			expectedData: map[string]string{
-				"mem://localhost/index/case01/num/myTable_city_id/data.json": `[{"@indexBy@": "value"},
+				"mem://localhost/index/case01/int/myTable_city_id/data.json": `[{"@indexBy@": "value"},
 {"batch_id":1, "value":1, "events":3 },
 {"batch_id":1, "value":2, "events":4 }]`,
 			},
