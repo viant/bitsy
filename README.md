@@ -8,13 +8,14 @@ This library is compatible with Go 1.13+
 
 - [Motivation](#Motivation)
 - [Introduction](#Introduction)
-- [Indexing column types](#Indexing column types)
+- [Indexing column types](#Indexing-column-types)
 - [Rules](#Rules)
-- [CLI usage](#Bitsy CLI)
-- [Use in SQL](#SQL example)
+- [CLI usage](#Bitsy-CLI)
+- [Use in SQL](#SQL-example)
 - [Deployment](#Deployment)
-    - [Deployment Configuration](#Deployment Configuration)
-    - [Deploy with endly](#Deploy with endly)
+    - [Deployment Configuration](#Deployment-Configuration)
+    - [Deploy with endly](#Deploy-with-endly)
+- [License](#license)
 
 
 ## Motivation
@@ -153,3 +154,10 @@ git checkout https://github.com/viant/bitsy.git
 cd bitsy/deployment
 endly authWith=myGoogleSecrets.json
 ```
+
+## License
+
+The source code is made available under the terms of the Apache License, Version 2, as stated in the file `LICENSE`.
+
+Individual files may be made available under their own specific license,
+all compatible with Apache License, Version 2. Please see individual files for details.
