@@ -43,6 +43,8 @@ func Test_Process(t *testing.T) {
 					BooleanPrefix: "bool/",
 				},
 				BatchField:    "batch_id",
+				RecordsField : "records",
+				ValueField : "value",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
 				IndexingFields: []config.Field{
@@ -66,15 +68,15 @@ func Test_Process(t *testing.T) {
 {"id": 3, "name": "Adam", "country":"nep", "batch_id":1,"city_id":2, "seq":2, "tstamp":"2020-11-01 01:01:01"}`,
 			expected: map[string]string{
 				"text/test_name/data.json": `{"@indexBy@": "value"}
-{"batch_id":1, "value":"Adam", "events":5 }
-{"batch_id":1, "value":"Kent", "events":2 }`,
+{"batch_id":1, "value":"Adam", "records":5 }
+{"batch_id":1, "value":"Kent", "records":2 }`,
 				"text/test_country/data.json": `{"@indexBy@": "value"}
-{"batch_id":1, "value":"us", "events":3 }
-{"batch_id":1, "value":"nep", "events":4 }
+{"batch_id":1, "value":"us", "records":3 }
+{"batch_id":1, "value":"nep", "records":4 }
 `,
 				"num/test_city_id/data.json": `{"@indexBy@": "value"}
-{"batch_id":1, "value":1, "events":3 }
-{"batch_id":1, "value":2, "events":4 }
+{"batch_id":1, "value":1, "records":3 }
+{"batch_id":1, "value":2, "records":4 }
 `,
 			},
 		},
@@ -96,6 +98,8 @@ func Test_Process(t *testing.T) {
 					BooleanPrefix: "bool/",
 				},
 				BatchField:    "batch_id",
+				RecordsField : "records",
+				ValueField : "value",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
 				IndexingFields: []config.Field{
@@ -112,10 +116,10 @@ func Test_Process(t *testing.T) {
 {"id": 3, "segments": [1,10,100], "batch_id":1,"seq":2, "tstamp":"2020-11-01 01:01:01"}`,
 			expected: map[string]string{
 				"num/test_segments/data.json": `{"@indexBy@": "value"}
-{"batch_id":1, "value":1, "events":7 }
-{"batch_id":1, "value":10, "events":5 }
-{"batch_id":1, "value":20, "events":2 }
-{"batch_id":1, "value":100, "events":5 }
+{"batch_id":1, "value":1, "records":7 }
+{"batch_id":1, "value":10, "records":5 }
+{"batch_id":1, "value":20, "records":2 }
+{"batch_id":1, "value":100, "records":5 }
 `,
 			},
 		},
@@ -137,6 +141,8 @@ func Test_Process(t *testing.T) {
 					BooleanPrefix: "bool/",
 				},
 				BatchField:    "batch_id",
+				RecordsField : "records",
+				ValueField : "value",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
 				IndexingFields: []config.Field{
@@ -152,8 +158,8 @@ func Test_Process(t *testing.T) {
 {"id": 3, "is_pmp": false, "batch_id":1,"seq":2, "tstamp":"2020-11-01 01:01:01"}`,
 			expected: map[string]string{
 				"bool/test_is_pmp/data.json": `{"@indexBy@": "value"}
-{"batch_id":1, "value":true, "events":3 }
-{"batch_id":1, "value":false, "events":4 }
+{"batch_id":1, "value":true, "records":3 }
+{"batch_id":1, "value":false, "records":4 }
 `,
 			},
 		},
@@ -175,6 +181,8 @@ func Test_Process(t *testing.T) {
 					BooleanPrefix: "bool/",
 				},
 				BatchField:    "batch_id",
+				RecordsField : "records",
+				ValueField : "value",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
 				IndexingFields: []config.Field{
@@ -190,9 +198,9 @@ func Test_Process(t *testing.T) {
 {"id": 3, "cp": 0.1, "batch_id":1,"seq":2, "tstamp":"2020-11-01 01:01:01"}`,
 			expected: map[string]string{
 				"float/test_cp/data.json": `{"@indexBy@": "value"}
-{"batch_id":1, "value":0.000012, "events":1 }
-{"batch_id":1, "value":0.1, "events":4 }
-{"batch_id":1, "value":0.0, "events":2 }
+{"batch_id":1, "value":0.000012, "records":1 }
+{"batch_id":1, "value":0.1, "records":4 }
+{"batch_id":1, "value":0.0, "records":2 }
 `,
 			},
 		},

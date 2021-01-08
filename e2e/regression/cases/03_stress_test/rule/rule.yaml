@@ -10,6 +10,7 @@ timeField: ts
 batchField: batch_id
 sequenceField: seq
 allowQuotedNumbers: true
+recordsField: events
 indexingFields:
   - Name: field1
     Type: int

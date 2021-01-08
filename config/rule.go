@@ -39,6 +39,8 @@ type Rule struct {
 	AllowQuotedNumbers bool
 	Dest               Destination
 	When               matcher.Basic
+	RecordsField        string
+	ValueField         string
 }
 
 func (r *Rule) Fields() map[string]*Field {
@@ -69,6 +71,12 @@ func (r *Rule) Init() {
 	}
 	if strings.HasSuffix(r.Dest.URL, ".gz") && r.Dest.Codec == "" {
 		r.Dest.Codec = "gzip"
+	}
+	if r.ValueField == "" {
+		r.ValueField = "value"
+	}
+	if r.RecordsField == "" {
+		r.RecordsField ="records"
 	}
 }
 

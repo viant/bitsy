@@ -1,6 +1,6 @@
 package indexer
 
 type Base struct {
-	*Event
+	*Record
 	Events int64
 }

@@ -7,7 +7,7 @@ import (
 	"math"
 )
 
-type Event struct {
+type Record struct {
 	*config.Rule
 	BatchID   int
 	Sequence  int
@@ -17,7 +17,7 @@ type Event struct {
 	keys      int
 }
 
-func (e *Event) UnmarshalJSONObject(dec *gojay.Decoder, key string) (err error) {
+func (e *Record) UnmarshalJSONObject(dec *gojay.Decoder, key string) (err error) {
 
 	switch key {
 	case e.Rule.TimeField:
@@ -46,12 +46,12 @@ func (e *Event) UnmarshalJSONObject(dec *gojay.Decoder, key string) (err error) 
 	return nil
 }
 
-func (e *Event) NKeys() int {
+func (e *Record) NKeys() int {
 	return e.keys
 }
 
-func NewEvent(rule *config.Rule) *Event {
-	result := &Event{
+func newRecord(rule *config.Rule) *Record {
+	result := &Record{
 		Rule:     rule,
 		BatchID:  math.MinInt64,
 		Sequence: math.MinInt64,

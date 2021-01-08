@@ -34,7 +34,7 @@ func (p *Processor) Process(ctx context.Context, data []byte, reporter processor
 	textFields := make([]Texts, len(p.IndexingFields))
 	boolFields := make([]Bools, len(p.IndexingFields))
 	events := bytes.Split(data, []byte{'\n'})
-	err := p.indexEvents(events, textFields, intFields, boolFields, floatFields)
+	err := p.indexRecords(events, textFields, intFields, boolFields, floatFields)
 	if err != nil {
 		return err
 	}
@@ -59,21 +59,21 @@ func (p Processor) Post(ctx context.Context, reporter processor.Reporter) error 
 	return logger.Close()
 }
 
-func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues []Ints, boolFields []Bools, floatFields []Floats) error {
-	for _, eventLine := range events {
+func (p *Processor) indexRecords(records [][]byte, textFields []Texts, intValues []Ints, boolFields []Bools, floatFields []Floats) error {
+	for _, recordLine := range records {
 
-		event := NewEvent(p.Rule)
-		if err := gojay.Unmarshal(eventLine, event); err != nil {
-			return processor.NewDataCorruption(fmt.Sprintf("invalid json %v, %s", err, eventLine))
+		record := newRecord(p.Rule)
+		if err := gojay.Unmarshal(recordLine, record); err != nil {
+			return processor.NewDataCorruption(fmt.Sprintf("invalid json %v, %s", err, recordLine))
 		}
-		if event.BatchID == math.MinInt64 {
-			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' batch field: %s", p.BatchField, eventLine))
+		if record.BatchID == math.MinInt64 {
+			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' batch field: %s", p.BatchField, recordLine))
 		}
-		if event.Sequence == math.MinInt64 {
-			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' seq field: %s", p.SequenceField, eventLine))
+		if record.Sequence == math.MinInt64 {
+			return processor.NewDataCorruption(fmt.Sprintf("missing value for '%v' seq field: %s", p.SequenceField, recordLine))
 		}
-		for _, field := range event.IndexingFields {
-			rawValue, ok := event.values[field.Name]
+		for _, field := range record.IndexingFields {
+			rawValue, ok := record.values[field.Name]
 			if !ok || len(rawValue) == 0 {
 				continue
 			}
@@ -84,14 +84,14 @@ func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues [
 				if len(textFields[field.Index]) == 0 {
 					textFields[field.Index] = make(Texts, 1000)
 				}
-				if err := p.decodeAndIndexText(isRepeated, rawValue, textFields[field.Index], event); err != nil {
+				if err := p.decodeAndIndexText(isRepeated, rawValue, textFields[field.Index], record); err != nil {
 					return err
 				}
 			case config.TypeInt:
 				if len(intValues[field.Index]) == 0 {
 					intValues[field.Index] = make(Ints, 10000)
 				}
-				err := p.decodeAndIndexInt(isRepeated, rawValue, intValues[field.Index], event)
+				err := p.decodeAndIndexInt(isRepeated, rawValue, intValues[field.Index], record)
 				if err != nil {
 					return err
 				}
@@ -100,7 +100,7 @@ func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues [
 				if len(floatFields[field.Index]) == 0 {
 					floatFields[field.Index] = make(Floats, 1000)
 				}
-				err := p.decodeAndIndexFloat(isRepeated, rawValue, floatFields[field.Index], event)
+				err := p.decodeAndIndexFloat(isRepeated, rawValue, floatFields[field.Index], record)
 				if err != nil {
 					return err
 				}
@@ -109,7 +109,7 @@ func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues [
 				if len(boolFields[field.Index]) == 0 {
 					boolFields[field.Index] = make(Bools, 2)
 				}
-				err := p.decodeAndIndexBool(isRepeated, rawValue, boolFields[field.Index], event)
+				err := p.decodeAndIndexBool(isRepeated, rawValue, boolFields[field.Index], record)
 				if err != nil {
 					return err
 				}
@@ -124,7 +124,7 @@ func (p *Processor) indexEvents(events [][]byte, textFields []Texts, intValues [
 	return nil
 }
 
-func (p *Processor) decodeAndIndexFloat(isRepeated bool, rawValue []byte, values Floats, event *Event) error {
+func (p *Processor) decodeAndIndexFloat(isRepeated bool, rawValue []byte, values Floats, event *Record) error {
 	if isRepeated {
 		floats := dec.Floats{Callback: func(value float64) {
 			p.indexFloatValues(values, value, event)
@@ -142,7 +142,7 @@ func (p *Processor) decodeAndIndexFloat(isRepeated bool, rawValue []byte, values
 	return nil
 }
 
-func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, values Bools, event *Event) error {
+func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, values Bools, event *Record) error {
 	if isRepeated {
 		bools := dec.Bools{Callback: func(value bool) {
 			p.indexBoolValues(values, value, event)
@@ -160,7 +160,7 @@ func (p *Processor) decodeAndIndexBool(isRepeated bool, rawValue []byte, values 
 	return nil
 }
 
-func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, values Ints, event *Event) error {
+func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, values Ints, event *Record) error {
 	if isRepeated {
 		ints := dec.Ints{Callback: func(value int) {
 			p.indexIntValues(values, value, event)
@@ -179,7 +179,7 @@ func (p *Processor) decodeAndIndexInt(isRepeated bool, rawValue []byte, values I
 	return nil
 }
 
-func (p *Processor) decodeAndIndexText(isRepeated bool, rawValue []byte, values Texts, event *Event) error {
+func (p *Processor) decodeAndIndexText(isRepeated bool, rawValue []byte, values Texts, event *Record) error {
 	if isRepeated {
 		strings := dec.Strings{Callback: func(value string) {
 			p.indexTextValues(values, value, event)
@@ -261,11 +261,11 @@ func (p Processor) logIndexedBools(bools []Bools, multiLogger *destination.Multi
 	return nil
 }
 
-func (p *Processor) indexTextValues(values Texts, actual string, event *Event) {
+func (p *Processor) indexTextValues(values Texts, actual string, event *Record) {
 	if _, ok := values[actual]; !ok {
 		values[actual] = &Text{
 			Base: Base{
-				Event:  event,
+				Record: event,
 				Events: 0,
 			},
 			Value: actual,
@@ -275,11 +275,11 @@ func (p *Processor) indexTextValues(values Texts, actual string, event *Event) {
 	textValue.Events = textValue.Events | oneBit<<event.Sequence
 }
 
-func (p *Processor) indexIntValues(values Ints, actual int, event *Event) {
+func (p *Processor) indexIntValues(values Ints, actual int, event *Record) {
 	if _, ok := values[actual]; !ok {
 		values[actual] = &Int{
 			Base: Base{
-				Event:  event,
+				Record: event,
 				Events: 0,
 			},
 			Value: actual,
@@ -289,11 +289,11 @@ func (p *Processor) indexIntValues(values Ints, actual int, event *Event) {
 	intValue.Events = intValue.Events | oneBit<<(event.Sequence)
 }
 
-func (p *Processor) indexFloatValues(values Floats, actual float64, event *Event) {
+func (p *Processor) indexFloatValues(values Floats, actual float64, event *Record) {
 	if _, ok := values[actual]; !ok {
 		values[actual] = &Float{
 			Base: Base{
-				Event:  event,
+				Record: event,
 				Events: 0,
 			},
 			Value: actual,
@@ -303,11 +303,11 @@ func (p *Processor) indexFloatValues(values Floats, actual float64, event *Event
 	intValue.Events = intValue.Events | oneBit<<(event.Sequence)
 }
 
-func (p Processor) indexBoolValues(boolValues Bools, actual bool, event *Event) {
+func (p Processor) indexBoolValues(boolValues Bools, actual bool, event *Record) {
 	if _, ok := boolValues[actual]; !ok {
 		boolValues[actual] = &Bool{
 			Base: Base{
-				Event:  event,
+				Record: event,
 				Events: 0,
 			},
 			Value: actual,
@@ -321,14 +321,14 @@ func (p Processor) indexBoolValues(boolValues Bools, actual bool, event *Event) 
 func (p *Processor) logBase(message *msg.Message, value *Base) {
 	message.PutNonEmptyString(p.Rule.TimeField, value.Timestamp)
 	message.PutInt(p.Rule.BatchField, value.BatchID)
-	message.PutInt("events", int(value.Events))
+	message.PutInt(p.Rule.RecordsField, int(value.Events))
 }
 
 func (p *Processor) logInt(logger *log.Logger, values Ints) {
 	for _, value := range values {
 		message := p.msgProvider.NewMessage()
 		p.logBase(message, &value.Base)
-		message.PutInt("value", value.Value)
+		message.PutInt(p.Rule.ValueField, value.Value)
 		logger.Log(message)
 		message.Free()
 	}
