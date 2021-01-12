@@ -85,7 +85,7 @@ func (p *Processor) indexRecords(records [][]byte, textFields []Texts, intValues
 					textFields[field.Index] = make(Texts, 1000)
 				}
 				if err := p.decodeAndIndexText(isRepeated, rawValue, textFields[field.Index], record); err != nil {
-					return err
+					return processor.NewDataCorruption(fmt.Sprintf("failed to decode string field : %s", field.Name))
 				}
 			case config.TypeInt:
 				if len(intValues[field.Index]) == 0 {
@@ -93,7 +93,7 @@ func (p *Processor) indexRecords(records [][]byte, textFields []Texts, intValues
 				}
 				err := p.decodeAndIndexInt(isRepeated, rawValue, intValues[field.Index], record)
 				if err != nil {
-					return err
+					return processor.NewDataCorruption(fmt.Sprintf("failed to decode int field : %s", field.Name))
 				}
 
 			case config.TypeFloat:
@@ -102,7 +102,7 @@ func (p *Processor) indexRecords(records [][]byte, textFields []Texts, intValues
 				}
 				err := p.decodeAndIndexFloat(isRepeated, rawValue, floatFields[field.Index], record)
 				if err != nil {
-					return err
+					return processor.NewDataCorruption(fmt.Sprintf("failed to decode float field : %s", field.Name))
 				}
 
 			case config.TypeBool:
@@ -111,7 +111,7 @@ func (p *Processor) indexRecords(records [][]byte, textFields []Texts, intValues
 				}
 				err := p.decodeAndIndexBool(isRepeated, rawValue, boolFields[field.Index], record)
 				if err != nil {
-					return err
+					return processor.NewDataCorruption(fmt.Sprintf("failed to decode bool field : %s", field.Name))
 				}
 			default:
 				return fmt.Errorf("unsupported type: %s", field.Type)
