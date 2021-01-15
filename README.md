@@ -52,7 +52,7 @@ expressions.
 
 The implementation supports the following data types for indexing columns:
 
-- Numeric
+- Integer
 - Floating
 - Text
 - Boolean
@@ -78,12 +78,20 @@ batchField: batch_id
 sequenceField: seq
 partitionField: part_id
 allowQuotedNumbers: true
+recordsField: records
+valueField: value
 indexingFields:
   - Name: city_id
     Type: int
   - Name: name
     Type: string
 ```
+
+- batchField: the source data field name containing batch number/id
+- sequenceField: the source data field name containing sequence number/id
+- recordsField: the output data bitset field name
+- valueField: the output data indexed value field name
+
 
 ## Bitsy CLI
 
