@@ -13,7 +13,7 @@ func DecodeInt(dec *gojay.Decoder) (int, error) {
 		return 0, fmt.Errorf("failed to decoded embeded json %w", err)
 	}
 	if count := bytes.Count(raw, []byte(`"`)); count == 2 {
-		raw = raw[1 : len(raw)-2]
+		raw = raw[1 : len(raw)-1]
 	}
 	if len(raw) == 0 {
 		return 0, nil

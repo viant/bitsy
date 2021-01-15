@@ -204,6 +204,66 @@ func Test_Process(t *testing.T) {
 `,
 			},
 		},
+
+
+		{
+			description: "multi rows index",
+			Rules: config.Rules{
+				Config: processor.Config{
+					DestinationURL: "mem://localhost/data/$fragment/data.json",
+				},
+			},
+
+			Rule: config.Rule{
+				Dest: config.Destination{
+					TableRoot:     "test_",
+					TextPrefix:    "text/",
+					IntPrefix:     "num/",
+					FloatPrefix:   "float/",
+					URIKeyName:    "$fragment",
+					BooleanPrefix: "bool/",
+				},
+				BatchField:    "batch_id",
+				RecordsField : "records",
+				ValueField : "value",
+				SequenceField: "seq",
+				AllowQuotedNumbers: true,
+				TimeField:     "tstamp",
+				IndexingFields: []config.Field{
+					{
+						Name: "name",
+						Type: "string",
+					},
+					{
+						Name: "country",
+						Type: "string",
+					},
+					{
+						Name: "city_id",
+						Type: "int",
+					},
+				},
+			},
+			expectedURL: "mem://localhost/data/",
+			input: `{"id": 1, "name": "Adam", "country": "us", "city_id":1, "batch_id":"511415406", "seq":0, "tstamp":"2020-11-01 01:01:01"}
+{"id": 2, "name": "Kent", "country":"us","batch_id":"511415406", "city_id":1, "seq":1, "tstamp":"2020-11-01 01:01:01"}
+{"id": 3, "name": "Adam", "country":"nep", "batch_id":"511415406","city_id":2, "seq":2, "tstamp":"2020-11-01 01:01:01"}`,
+			expected: map[string]string{
+				"text/test_name/data.json": `{"@indexBy@": "value"}
+{"batch_id":511415406, "value":"Adam", "records":5 }
+{"batch_id":511415406, "value":"Kent", "records":2 }`,
+				"text/test_country/data.json": `{"@indexBy@": "value"}
+{"batch_id":511415406, "value":"us", "records":3 }
+{"batch_id":511415406, "value":"nep", "records":4 }
+`,
+				"num/test_city_id/data.json": `{"@indexBy@": "value"}
+{"batch_id":511415406, "value":1, "records":3 }
+{"batch_id":511415406, "value":2, "records":4 }
+`,
+			},
+		},
+
+
 	}
 
 	fs := afs.New()
