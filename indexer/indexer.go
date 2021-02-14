@@ -17,8 +17,7 @@ func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
 	}
 	request, err := event.NewRequest(ctx, fs, &service.config.Config)
 	if err != nil {
-		fmt.Printf("build request error: %v\n", err)
-		return nil
+		return fmt.Errorf("failed to build request: %w", err)
 	}
 	resp := service.Index(ctx, request)
 	JSON, _ := json.Marshal(resp)
