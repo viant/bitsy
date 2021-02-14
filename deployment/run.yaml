@@ -38,8 +38,9 @@ pipeline:
       action: gcp/cloudfunctions:deploy
       availableMemoryMb: 4096
       timeout: 540s
-      maxInstances: 20
+      maxInstances: 500
       region: $region
+      retry: true
       '@name': $appName
       entryPoint: HandleEvent
       credentials: $gcpCredentials

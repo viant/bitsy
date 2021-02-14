@@ -8,5 +8,7 @@
   "CorruptionURL": "gs://${opsBucket}/${appName}/corrupted",
   "MaxExecTimeMs": 540000,
   "BaseURL" : "gs://${configBucket}/${appName}/Rules",
-  "CheckFrequencyMs" : 100
+  "CheckFrequencyMs" : 100,
+  "OnDone": "delete",
+  "ScannerBufferMB": 2
 }
