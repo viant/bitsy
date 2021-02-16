@@ -17,6 +17,9 @@ func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
 	}
 	request, err := event.NewRequest(ctx, fs, &service.config.Config)
 	if err != nil {
+		if ok,_ :=  fs.Exists(ctx, event.URL()); ok {
+			return nil;
+		}
 		return fmt.Errorf("failed to build request: %w", err)
 	}
 	resp := service.Index(ctx, request)
