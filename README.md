@@ -8,6 +8,7 @@ This library is compatible with Go 1.13+
 
 - [Motivation](#Motivation)
 - [Introduction](#Introduction)
+- [Serverless indexing data flow](#serverless-indexing-data-flow)
 - [Indexing column types](#Indexing-column-types)
 - [Rules](#Rules)
 - [CLI usage](#Bitsy-CLI)
@@ -32,7 +33,7 @@ nature, by generating bitmap indexes for repeated and scalar columns/fields.
 Bitsy improves query performance by building bitmap indexes on the columns that are part of 
 an SQL query conditional expression.
 
-The implementation uses 64 bit bitsets to indicate a specific value presence in one (or several) records 
+The implementation uses 64 bits bitsets to indicate a specific value presence in one (or several) records 
 out of 64 based on the record sequential number.  To allow indexing more than 64 rows/records, the source 
 dataset has to be split into as many batches as necessary to represent the entire dataset. In addition 
 to the indexing columns and the record sequential number, the source dataset should include the batch number, 
@@ -47,6 +48,10 @@ A typical workflow happens as follows:
 - import index data into a table (one per each index) for subsequent use in SQL conditional 
 expressions.
 
+
+## Serverless indexing data flow
+
+![Mediator](images/bitsy.png)
 
 ## Indexing column types
 
