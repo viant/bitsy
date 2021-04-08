@@ -3,7 +3,6 @@ module github.com/viant/bitsy
 go 1.15
 
 require (
-	cloud.google.com/go v0.65.0 // indirect
 	github.com/francoispqt/gojay v1.2.13
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/jessevdk/go-flags v1.4.0
@@ -15,6 +14,8 @@ require (
 	github.com/viant/cloudless v0.25.0
 	github.com/viant/tapper v0.1.0
 	github.com/viant/toolbox v0.33.2
+	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
+	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect
 	google.golang.org/api v0.34.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )

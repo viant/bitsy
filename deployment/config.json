@@ -10,5 +10,6 @@
   "BaseURL" : "gs://${configBucket}/${appName}/Rules",
   "CheckFrequencyMs" : 100,
   "OnDone": "delete",
-  "ScannerBufferMB": 2
+  "ScannerBufferMB": 2,
+
 }

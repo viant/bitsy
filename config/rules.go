@@ -18,6 +18,7 @@ type Rules struct {
 	Indexes          []*Rule
 	*resource.Tracker
 	mux sync.RWMutex
+	PreSorted *bool
 }
 
 func (r *Rules) Match(URL string) []*Rule {
@@ -115,13 +116,20 @@ func (r *Rules) ProcessorConfig(rule *Rule) processor.Config {
 	cfg.DestinationURL = rule.Dest.URL
 	cfg.DestinationCodec = rule.Dest.Codec
 	cfg.BatchSize = 64
-	cfg.Sort.Format = "json"
-	cfg.Sort.Batch = true
-	cfg.Sort.By = []processor.Field{
-		{
-			Name:      rule.BatchField,
-			IsNumeric: true,
-		},
+	preSorted := rule.PreSorted
+	if r.PreSorted != nil && *r.PreSorted {
+		preSorted = true
 	}
+	if !preSorted {
+		cfg.Sort.By = []processor.Field{
+			{
+				Name:      rule.BatchField,
+				IsNumeric: true,
+			},
+		}
+		cfg.Sort.Format = "json"
+		cfg.Sort.Batch = true
+	}
+
 	return cfg
 }
