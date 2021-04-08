@@ -39,8 +39,9 @@ type Rule struct {
 	AllowQuotedNumbers bool
 	Dest               Destination
 	When               matcher.Basic
-	RecordsField        string
+	RecordsField       string
 	ValueField         string
+	PreSorted             bool
 }
 
 func (r *Rule) Fields() map[string]*Field {
@@ -76,8 +77,9 @@ func (r *Rule) Init() {
 		r.ValueField = "value"
 	}
 	if r.RecordsField == "" {
-		r.RecordsField ="records"
+		r.RecordsField = "records"
 	}
+
 }
 
 func (d *Destination) Init() {

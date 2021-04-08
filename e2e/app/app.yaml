@@ -32,7 +32,6 @@ pipeline:
       action: gcp/cloudfunctions:deploy
       availableMemoryMb: 4096
       timeout: 540s
-      maxInstances: 20
       region: us-central1
       '@name': $appName
       entryPoint: HandleEvent
