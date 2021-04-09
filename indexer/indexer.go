@@ -11,7 +11,7 @@ import (
 
 func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
 	fs := afs.New()
-	service, err := Singleton(ctx, ConfigKey)
+	service, err := NewService(ctx, ConfigKey)
 	if err != nil {
 		fmt.Printf("could not init service: %v\n", err)
 		return nil
