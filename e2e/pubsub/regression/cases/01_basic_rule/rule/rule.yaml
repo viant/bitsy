@@ -1,0 +1,22 @@
+when:
+  prefix: "/data/case${parentIndex}/"
+  suffix: json
+
+dest:
+  URL: gs://${operationBucket}/${appName}/index/case${parentIndex}/$fragment/data.json
+  TableRoot: myTable_
+
+timeField: ts
+batchField: batch_id
+sequenceField: seq
+allowQuotedNumbers: true
+recordsField: events
+indexingFields:
+  - Name: field1
+    Type: int
+  - Name: field2
+    Type: int
+  - Name: field3
+    Type: int
+
+OnDone: delete

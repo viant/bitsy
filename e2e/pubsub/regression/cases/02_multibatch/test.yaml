@@ -1,0 +1,58 @@
+init:
+  doneCounter: 0
+  parentIndex: ${parent.index}
+  expectedField1: $LoadJSON('${parent.path}/data/expect/field1.json')
+  expectedField2: $LoadJSON('${parent.path}/data/expect/field2.json')
+pipeline:
+  cleanUp:
+    action: storage:remove
+    sleepTimeMs: 1000
+    assets:
+      - URL: 'gs://${configBucket}/${appName}/_.cache'
+        credentials: $gcpCredentials
+      - URL: 'gs://${configBucket}/${appName}/Rules/case_${parent.index}/'
+        credentials: $gcpCredentials
+
+  setupRule:
+    action: storage:copy
+    expand: true
+    source:
+      URL: ${parent.path}/rule/
+    dest:
+      credentials: $gcpCredentials
+      URL: gs://${configBucket}/${appName}/Rules/case_${parent.index}
+
+  trigger:
+    action: storage:copy
+    source:
+      URL: ${parent.path}/data/trigger/
+    dest:
+      URL: gs://${triggerBucket}/data/case${parent.index}/
+      credentials: $gcpCredentials
+    sleepTimeMs: 15000
+
+  validateField1:
+    loadContent:
+      action: storage:download
+      Source:
+        URL: gs://${operationBucket}/${appName}/index/case${parentIndex}/num/myTable_field1/data.json
+        Credentials: $gcpCredentials
+      DestKey: actualField1
+
+    checkContent:
+      action: validator:assert
+      actual: $actualField1
+      expect: $expectedField1
+
+  validateField2:
+    loadContent:
+      action: storage:download
+      Source:
+        URL: gs://${operationBucket}/${appName}/index/case${parentIndex}/num/myTable_field2/data.json
+        Credentials: $gcpCredentials
+      DestKey: actualField2
+
+    checkContent:
+      action: validator:assert
+      actual: $actualField2
+      expect: $expectedField2

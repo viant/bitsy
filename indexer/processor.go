@@ -9,10 +9,12 @@ import (
 	"github.com/viant/bitsy/indexer/dec"
 	"github.com/viant/cloudless/data/processor"
 	"github.com/viant/cloudless/data/processor/destination"
+	cfg "github.com/viant/tapper/config"
 	"github.com/viant/tapper/log"
 	"github.com/viant/tapper/msg"
 	"math"
 	"strings"
+	"time"
 )
 
 //Processor represent bitset indexer
@@ -24,6 +26,12 @@ type Processor struct {
 var oneBit = int64(1)
 
 func (p Processor) Pre(ctx context.Context, reporter processor.Reporter) (context.Context, error) {
+	if reporter.BaseResponse().Destination == nil {
+		reporterDestination := &cfg.Stream{
+			URL: ExpandURL(p.Dest.URL,time.Now()),
+		}
+		reporter.BaseResponse().Destination = reporterDestination
+	}
 	return destination.NewDataMultiLogger(ctx, p.Rule.Dest.URIKeyName, reporter)
 }
 

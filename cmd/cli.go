@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/jessevdk/go-flags"
 	"log"
+	"os"
 )
 
 const (
@@ -16,7 +18,6 @@ func RunClient(Version string, args []string) int {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	if options.RuleURL == "" {
 		buildRule(options)
 	}
@@ -35,4 +36,18 @@ func RunClient(Version string, args []string) int {
 		return 1
 	}
 	return 0
+}
+
+func RunApp(Version string,args []string) {
+	options := &Options{}
+	_, err := flags.ParseArgs(options, args)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = runApp(options)
+	if err != nil {
+		fmt.Printf("failed to run app: %v\n", err)
+	}
+	os.Exit(1)
+
 }

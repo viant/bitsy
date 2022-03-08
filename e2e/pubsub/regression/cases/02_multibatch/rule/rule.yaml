@@ -1,0 +1,24 @@
+when:
+  prefix: "/data/case${parentIndex}/"
+#  prefix: "/Users/ppoudyal/go/src/github.com/viant/bitsy/e2e/regression/cases/02_multibatch/data/trigger"
+  suffix: json
+
+dest:
+  URL: gs://${operationBucket}/${appName}/index/case${parentIndex}/$fragment/data.json
+#  URL: /tmp/bitsy/testcase2/$fragment/data.json
+  TableRoot: myTable_
+
+timeField: ts
+batchField: batch_id
+sequenceField: seq
+allowQuotedNumbers: true
+recordsField: events
+indexingFields:
+  - Name: field1
+    Type: int
+  - Name: field2
+    Type: int
+  - Name: field3
+    Type: int
+
+OnDone: delete

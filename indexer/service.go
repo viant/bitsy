@@ -17,6 +17,8 @@ type Service struct {
 	cfs    afs.Service
 }
 
+
+
 func (s *Service) Index(ctx context.Context, request *processor.Request) *Reporter {
 	reporter := NewReporter()
 	err := s.index(ctx, request, reporter)
@@ -53,6 +55,26 @@ func (s *Service) index(ctx context.Context, request *processor.Request, reporte
 	}
 }
 
+func (s *Service) Handle(ctx context.Context, request *processor.Request) (processor.Processor, error) {
+	err := s.config.ReloadIfNeeded(ctx, s.cfs)
+	if err != nil {
+		return nil, err
+	}
+	rules := s.config.Match(request.SourceURL)
+	switch len(rules) {
+	case 0:
+		return nil, fmt.Errorf("not matched: %v", request.SourceURL)
+	case 1:
+		s.config.ProcessorConfig(rules[0])
+		proc := NewProcessor(rules[0], s.config.Concurrency)
+		return proc, nil
+	default:
+		return nil, fmt.Errorf("too many rules matched %+v", rules)
+
+	}
+
+}
+
 func New(cfg *config.Config, fs afs.Service) *Service {
 	cfg.Init()
 	URL,_ := url.Split(cfg.BaseURL,file.Scheme)
@@ -61,4 +83,5 @@ func New(cfg *config.Config, fs afs.Service) *Service {
 		fs:     fs,
 		cfs:    cache.Singleton(URL),
 	}
+
 }
