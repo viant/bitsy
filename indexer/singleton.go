@@ -23,7 +23,6 @@ func Singleton(ctx context.Context, location string) (*Service, error) {
 			return
 		}
 	})
-
 	if err != nil {
 		runOnce = &sync.Once{}
 	}
@@ -35,8 +34,17 @@ func NewService(ctx context.Context, location string) (*Service, error) {
 	fs := afs.New()
 	cfg, cErr := config.NewConfigFromEnv(ctx, location)
 	if cErr != nil {
-		err = fmt.Errorf("failed to create config from env.%v: %v, %w", location, os.Getenv(location), cErr)
+		fmt.Errorf("failed to create config from env.%v: %v, %w", location, os.Getenv(location), cErr)
 		return nil , err
 	}
-	return  New(cfg, fs), nil
+	return  New(cfg, fs),nil
 }
+
+
+func NewServiceV1(cfg *config.Config,fs afs.Service) (*Service, error) {
+	return  New(cfg, fs),nil
+}
+
+
+
+

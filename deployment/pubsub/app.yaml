@@ -1,0 +1,101 @@
+init:
+  appName: bitsy
+  gcpCredentials: !gcp_projectId
+  gcp: ${secrets.$gcpCredentials}
+  projectID: ${gcp.ProjectID}
+  ns: $Replace($projectID,'-','_')
+  triggerBucket: ${ns}_bitsy_v1
+  operationBucket: ${ns}_operation
+  configBucket: ${ns}_config
+
+
+  sourcePath: $Pwd(./../..)
+  buildPath: /tmp/build/${appName}
+  appVersion: $Cat(${sourcePath}/Version}
+  target:
+    URL: scp://127.0.0.1
+    Credentials: localhost
+
+  cfgData: $Cat('config.json')
+  cfg: $AsJSON($cfgData)
+
+pipeline:
+
+  ver:
+    action: print
+    message: 'building ver: $appVersion'
+
+  init:
+    action: storage:upload
+    sourceKey: cfg
+    dest:
+      URL: gs://${configBucket}/<appName>/config_v1.json
+      credentials: $gcpCredentials
+
+
+  set_sdk:
+    action: sdk.set
+    target: $target
+    sdk: go:1.16
+
+  deploy:
+    buildBinary:
+      action: exec:run
+      target: $target
+      checkError: true
+      commands:
+        - mkdir -p $buildPath
+        - rm -rf $buildPath
+        - cp -rf ${sourcePath} $buildPath
+        - unset GOPATH
+        - export GO111MODULE=on
+        - export GOOS=linux
+        - export CGO=0
+        - cd  $buildPath/cmd/bitsy
+        - go build app.go
+        - cp app $buildPath/deployment/pubsub/docker/
+
+    info:
+      action: print
+      message: $appVersion
+
+    expandDockerFile:
+      action: storage:copy
+      expand: true
+      source:
+        URL: ${sourcePath}/deployment/pubsub/docker/Dockerfile
+      dest:
+        URL: ${buildPath}/deployment/pubsub/docker/Dockerfile
+
+    deploy:
+      buildImage:
+        action: docker:build
+        path: $buildPath/deployment/pubsub/docker/
+        nocache: true
+        tag:
+          image: bitsy
+          version: $appVersion
+
+
+    tag:
+      action: docker:tag
+      sourceTag:
+        image: ${appName}
+        version: $appVersion
+      targetTag:
+        image: ${appName}
+        username: $projectID
+        registry: us.gcr.io
+        version: $appVersion
+    publish:
+      auth:
+        action: docker:login
+        repository: us.gcr.io/${projectID}
+        credentials: $projectID
+    push:
+      action: docker:push
+      tag:
+        image: ${appName}
+        username: $projectID
+        registry: us.gcr.io
+        version: $appVersion

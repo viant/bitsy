@@ -1,0 +1,9 @@
+{"@indexBy@": "value"}
+{"ts":"2020-11-01 01:01:01","batch_id":1,"events":8,"value":109}
+{"ts":"2020-11-01 01:01:01","batch_id":1,"events":2,"value":101}
+{"ts":"2020-11-01 01:01:01","batch_id":1,"events":2,"value":202}
+{"ts":"2020-11-01 01:01:01","batch_id":1,"events":8,"value":209}
+{"ts":"2020-11-01 01:01:01","batch_id":1,"events":1,"value":10}
+{"ts":"2020-11-01 01:01:01","batch_id":1,"events":2,"value":303}
+{"ts":"2020-11-01 01:01:01","batch_id":1,"events":2,"value":404}
+{"ts":"2020-11-01 01:01:01","batch_id":1,"events":1,"value":20}

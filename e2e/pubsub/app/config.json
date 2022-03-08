@@ -1,0 +1,20 @@
+{
+  "BaseURL" : "gs://viant_e2e_config/bitsy/Rules",
+  "CheckFrequencyMs" : 1000,
+  "ProjectID" : "viant-e2e",
+  "Subscription":"bitsy",
+  "BatchSize" :20,
+  "MessageConcurrency":10,
+  "VisibilityTimeout":43200,
+  "PreSorted": true,
+  "DeadlineReductionMs": 60000,
+  "LoaderDeadlineLagMs": 5000,
+  "MaxRetries": 5,
+  "Concurrency": 100,
+  "RetryURL": "gs://viant_e2e_bitsy_v1/",
+  "FailedURL": "gs://viant_e2e_ops/bitsy/failed",
+  "CorruptionURL": "gs://viant_e2e_ops/bitsy/corrupted",
+  "MaxExecTimeMs": 540000,
+  "OnDone": "delete",
+  "ScannerBufferMB": 2
+}

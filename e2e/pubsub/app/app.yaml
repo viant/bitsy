@@ -1,0 +1,33 @@
+init:
+  config: $Cat(app/config.json)
+  appPath: $Pwd(./../..)
+
+pipeline:
+  deploy:
+    setSdk:
+      action: sdk:set
+      target: $target
+      sdk: go:1.16
+
+    build:
+      action: exec:run
+      target: $target
+      sleepTimeMs: 1500
+      checkError: true
+      commands:
+        - unset GOPATH
+        - cd ${appPath}
+        - cd cmd/bitsy
+        - go build -o bitsy_v1
+
+  stop:
+    action: process:stop
+    input: bitsy
+
+  start:
+    action: process:start
+    directory: ${appPath}/app
+    env:
+      GOOGLE_APPLICATION_CREDENTIALS: ~/.secret/${projectID}.json
+    immuneToHangups: true
+    command: ./bitsy_v1 -c=gs://${configBucket}/BitsyV1/config.json

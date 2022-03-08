@@ -11,4 +11,6 @@ type Options struct {
 	IndexingFields map[string]string `short:"f" long:"fields" description:"indexing fields, e.g.: -f x:string -f y:int"`
 	Concurrency    int               `short:"c" long:"concurrency" description:"processor concurrency"`
 	Compress       bool              `short:"a" long:"archive" description:"gzip output"`
+	ConfigURL      string            `short:"C" long:"configURL" description:"configuration url"`
 }
+

@@ -9,12 +9,12 @@ import (
 	"github.com/viant/assertly"
 	"github.com/viant/bitsy/config"
 	"github.com/viant/cloudless/data/processor"
+	"github.com/viant/cloudless/data/processor/subscriber/gcp"
 	"testing"
 	"time"
 )
 
 func Test_Process(t *testing.T) {
-
 	var useCases = []struct {
 		description string
 		config.Rule
@@ -24,12 +24,13 @@ func Test_Process(t *testing.T) {
 		expected    map[string]string
 		hasError    bool
 	}{
-
 		{
 			description: "multi rows index",
 			Rules: config.Rules{
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/data/$fragment/data.json",
+				Config: gcp.Config{
+					Config: processor.Config{
+						DestinationURL: "mem://localhost/data/$fragment/data.json",
+					},
 				},
 			},
 
@@ -43,8 +44,8 @@ func Test_Process(t *testing.T) {
 					BooleanPrefix: "bool/",
 				},
 				BatchField:    "batch_id",
-				RecordsField : "records",
-				ValueField : "value",
+				RecordsField:  "records",
+				ValueField:    "value",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
 				IndexingFields: []config.Field{
@@ -83,8 +84,10 @@ func Test_Process(t *testing.T) {
 		{
 			description: "repeated rows index",
 			Rules: config.Rules{
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/case2/$fragment/data.json",
+				Config: gcp.Config{
+					Config: processor.Config{
+						DestinationURL: "mem://localhost/case2/$fragment/data.json",
+					},
 				},
 			},
 			Rule: config.Rule{
@@ -98,8 +101,8 @@ func Test_Process(t *testing.T) {
 					BooleanPrefix: "bool/",
 				},
 				BatchField:    "batch_id",
-				RecordsField : "records",
-				ValueField : "value",
+				RecordsField:  "records",
+				ValueField:    "value",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
 				IndexingFields: []config.Field{
@@ -126,8 +129,10 @@ func Test_Process(t *testing.T) {
 		{
 			description: "boolean rows index",
 			Rules: config.Rules{
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/case2/$fragment/data.json",
+				Config: gcp.Config{
+					Config: processor.Config{
+						DestinationURL: "mem://localhost/case2/$fragment/data.json",
+					},
 				},
 			},
 			Rule: config.Rule{
@@ -141,8 +146,8 @@ func Test_Process(t *testing.T) {
 					BooleanPrefix: "bool/",
 				},
 				BatchField:    "batch_id",
-				RecordsField : "records",
-				ValueField : "value",
+				RecordsField:  "records",
+				ValueField:    "value",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
 				IndexingFields: []config.Field{
@@ -166,8 +171,10 @@ func Test_Process(t *testing.T) {
 		{
 			description: "float rows index",
 			Rules: config.Rules{
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/case4/$fragment/data.json",
+				Config: gcp.Config{
+					Config: processor.Config{
+						DestinationURL: "mem://localhost/case4/$fragment/data.json",
+					},
 				},
 			},
 			Rule: config.Rule{
@@ -181,8 +188,8 @@ func Test_Process(t *testing.T) {
 					BooleanPrefix: "bool/",
 				},
 				BatchField:    "batch_id",
-				RecordsField : "records",
-				ValueField : "value",
+				RecordsField:  "records",
+				ValueField:    "value",
 				SequenceField: "seq",
 				TimeField:     "tstamp",
 				IndexingFields: []config.Field{
@@ -209,8 +216,10 @@ func Test_Process(t *testing.T) {
 		{
 			description: "multi rows index",
 			Rules: config.Rules{
-				Config: processor.Config{
-					DestinationURL: "mem://localhost/data/$fragment/data.json",
+				Config: gcp.Config{
+					Config: processor.Config{
+						DestinationURL: "mem://localhost/data/$fragment/data.json",
+					},
 				},
 			},
 
@@ -223,12 +232,12 @@ func Test_Process(t *testing.T) {
 					URIKeyName:    "$fragment",
 					BooleanPrefix: "bool/",
 				},
-				BatchField:    "batch_id",
-				RecordsField : "records",
-				ValueField : "value",
-				SequenceField: "seq",
+				BatchField:         "batch_id",
+				RecordsField:       "records",
+				ValueField:         "value",
+				SequenceField:      "seq",
 				AllowQuotedNumbers: true,
-				TimeField:     "tstamp",
+				TimeField:          "tstamp",
 				IndexingFields: []config.Field{
 					{
 						Name: "name",
@@ -262,8 +271,6 @@ func Test_Process(t *testing.T) {
 `,
 			},
 		},
-
-
 	}
 
 	fs := afs.New()
@@ -273,7 +280,7 @@ func Test_Process(t *testing.T) {
 		proc := NewProcessor(&useCase.Rule, 10)
 
 		reporter := processor.NewReporter()
-		reporter.BaseResponse().DestinationURL = useCase.Rules.ExpandDestinationURL(time.Now())
+		reporter.BaseResponse().Destination.URL = useCase.Rules.ExpandDestinationURL(time.Now())
 
 		ctx, err := proc.Pre(ctx, reporter)
 		if !assert.Nil(t, err, useCase.description) {

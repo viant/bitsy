@@ -16,7 +16,7 @@ func HandleEvent(ctx context.Context, event gcp.GSEvent) error {
 		fmt.Printf("could not init service: %v\n", err)
 		return nil
 	}
-	request, err := event.NewRequest(ctx, fs, &service.config.Config)
+	request, err := event.NewRequest(ctx, fs, &service.config.Config.Config)
 	if err != nil {
 		if ok, _ := fs.Exists(ctx, event.URL(), option.NewObjectKind(true)); ! ok {
 			fmt.Printf(`{"Status":"noFound", "URL":"%v"}`, event.URL())

@@ -35,3 +35,5 @@ func loadRule(options *Options, fs afs.Service) (*config.Rule, error) {
 	rule.Init()
 	return rule, nil
 }
+
+

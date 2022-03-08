@@ -8,6 +8,7 @@ import (
 	"github.com/viant/assertly"
 	"github.com/viant/bitsy/config"
 	"github.com/viant/cloudless/data/processor"
+	"github.com/viant/cloudless/data/processor/subscriber/gcp"
 	"github.com/viant/toolbox"
 	"io/ioutil"
 	"path"
@@ -31,13 +32,15 @@ func TestService_Index(t *testing.T) {
 			config: &config.Config{
 				Rules: config.Rules{
 					BaseURL: path.Join(parent, "test_data/index/01_yaml/rules"),
-					Config: processor.Config{
-						RetryURL:        "mem://localhost/bitsy/retry",
-						FailedURL:       "mem://localhost/bitsy/failed",
-						CorruptionURL:   "mem://localhost/bitsy/corrupted",
-						MaxExecTimeMs:   120000,
-						ScannerBufferMB: 2,
-						MaxRetries:      2,
+					Config: gcp.Config{
+						Config: processor.Config{
+							RetryURL:        "mem://localhost/bitsy/retry",
+							FailedURL:       "mem://localhost/bitsy/failed",
+							CorruptionURL:   "mem://localhost/bitsy/corrupted",
+							MaxExecTimeMs:   120000,
+							ScannerBufferMB: 2,
+							MaxRetries:      2,
+						},
 					},
 				},
 			},
