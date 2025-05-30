@@ -10,6 +10,7 @@ import (
 	"github.com/viant/bitsy/config"
 	"github.com/viant/cloudless/data/processor"
 	"github.com/viant/cloudless/data/processor/subscriber/gcp"
+	cfg "github.com/viant/tapper/config"
 	"testing"
 	"time"
 )
@@ -212,7 +213,6 @@ func Test_Process(t *testing.T) {
 			},
 		},
 
-
 		{
 			description: "multi rows index",
 			Rules: config.Rules{
@@ -280,8 +280,10 @@ func Test_Process(t *testing.T) {
 		proc := NewProcessor(&useCase.Rule, 10)
 
 		reporter := processor.NewReporter()
-		reporter.BaseResponse().Destination.URL = useCase.Rules.ExpandDestinationURL(time.Now())
-
+		reporter.BaseResponse().Destination = &cfg.Stream{
+			URL: useCase.Rules.ExpandDestinationURL(time.Now()),
+		}
+		//		reporter.BaseResponse().Destination.URL= useCase.Rules.ExpandDestinationURL(time.Now())
 		ctx, err := proc.Pre(ctx, reporter)
 		if !assert.Nil(t, err, useCase.description) {
 			continue

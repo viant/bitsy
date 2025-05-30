@@ -2,6 +2,7 @@ package bitsy
 
 import (
 	"context"
+	_ "github.com/GoogleCloudPlatform/functions-framework-go/funcframework"
 	"github.com/viant/bitsy/indexer"
 	"github.com/viant/cloudless/data/processor/adapter/gcp"
 )
