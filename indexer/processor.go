@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-//Processor represent bitset indexer
+// Processor represent bitset indexer
 type Processor struct {
 	*config.Rule
 	msgProvider *msg.Provider
@@ -28,14 +28,14 @@ var oneBit = int64(1)
 func (p Processor) Pre(ctx context.Context, reporter processor.Reporter) (context.Context, error) {
 	if reporter.BaseResponse().Destination == nil {
 		reporterDestination := &cfg.Stream{
-			URL: ExpandURL(p.Dest.URL,time.Now()),
+			URL: ExpandURL(p.Dest.URL, time.Now()),
 		}
 		reporter.BaseResponse().Destination = reporterDestination
 	}
 	return destination.NewDataMultiLogger(ctx, p.Rule.Dest.URIKeyName, reporter)
 }
 
-//Process process data unit (upto 64 rows)
+// Process process data unit (upto 64 rows)
 func (p *Processor) Process(ctx context.Context, data []byte, reporter processor.Reporter) error {
 	intFields := make([]Ints, len(p.IndexingFields))
 	floatFields := make([]Floats, len(p.IndexingFields))
@@ -280,7 +280,14 @@ func (p *Processor) indexTextValues(values Texts, actual string, event *Record) 
 		}
 	}
 	textValue := values[actual]
-	textValue.Events = textValue.Events | oneBit<<event.Sequence
+
+	// Add safety check to ensure sequence is within valid range (0-63)
+	if event.Sequence >= 0 && event.Sequence < 64 {
+		textValue.Events = textValue.Events | (oneBit << uint(event.Sequence))
+	} else {
+		// Handle invalid sequence value
+		textValue.Events = textValue.Events | (oneBit << 63)
+	}
 }
 
 func (p *Processor) indexIntValues(values Ints, actual int, event *Record) {
@@ -294,7 +301,14 @@ func (p *Processor) indexIntValues(values Ints, actual int, event *Record) {
 		}
 	}
 	intValue := values[actual]
-	intValue.Events = intValue.Events | oneBit<<(event.Sequence)
+	// Add safety check to ensure sequence is within valid range (0-63)
+	if event.Sequence >= 0 && event.Sequence < 64 {
+		intValue.Events = intValue.Events | (oneBit << uint(event.Sequence))
+	} else {
+		// Handle invalid sequence value
+		// For now, we'll use position 63 (the last bit) to indicate an error occurred
+		intValue.Events = intValue.Events | (oneBit << 63)
+	}
 }
 
 func (p *Processor) indexFloatValues(values Floats, actual float64, event *Record) {
@@ -307,8 +321,14 @@ func (p *Processor) indexFloatValues(values Floats, actual float64, event *Recor
 			Value: actual,
 		}
 	}
-	intValue := values[actual]
-	intValue.Events = intValue.Events | oneBit<<(event.Sequence)
+	floatValue := values[actual]
+	// Add safety check to ensure sequence is within valid range (0-63)
+	if event.Sequence >= 0 && event.Sequence < 64 {
+		floatValue.Events = floatValue.Events | (oneBit << uint(event.Sequence))
+	} else {
+		// Handle invalid sequence value
+		floatValue.Events = floatValue.Events | (oneBit << 63)
+	}
 }
 
 func (p Processor) indexBoolValues(boolValues Bools, actual bool, event *Record) {
@@ -373,7 +393,7 @@ func (p Processor) logBool(logger *log.Logger, values Bools) {
 
 }
 
-//NewProcessor creates a new processor
+// NewProcessor creates a new processor
 func NewProcessor(rule *config.Rule, concurrency int) *Processor {
 	return &Processor{Rule: rule,
 		msgProvider: msg.NewProvider(16*1024, concurrency),

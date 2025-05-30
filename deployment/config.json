@@ -3,13 +3,12 @@
   "LoaderDeadlineLagMs": 5000,
   "MaxRetries": 5,
   "Concurrency": 100,
-  "RetryURL": "gs://${triggerBucket}/",
-  "FailedURL": "gs://${opsBucket}/${appName}/failed",
-  "CorruptionURL": "gs://${opsBucket}/${appName}/corrupted",
+  "RetryURL": "gs://viane_e2e_bitsy_v1/",
+  "FailedURL": "gs://viane_e2e_operation/Bitsy_v1/failed",
+  "CorruptionURL": "gs://viane_e2e_operation/Bitsy_v1/corrupted",
   "MaxExecTimeMs": 540000,
-  "BaseURL" : "gs://${configBucket}/${appName}/Rules",
+  "BaseURL" : "gs://viant_e2e_config/Bitsy/Rules",
   "CheckFrequencyMs" : 100,
   "OnDone": "delete",
-  "ScannerBufferMB": 2,
-
+  "ScannerBufferMB": 2
 }

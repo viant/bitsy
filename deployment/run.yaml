@@ -1,27 +1,27 @@
 init:
-  appName: Bitsy
+  appName: Bitsy_v1
   appPath: $Pwd(./..)
-  '!region': $params.region
-  '!gcpCredentials': $params.authWith
+  'region': us-central1
+  'gcpCredentials': viant-e2e
   gcp: ${secrets.$gcpCredentials}
   projectID: $gcp.ProjectID
   prefix: $Replace(${projectID},'-','_')
   configBucket: ${prefix}_config
-  triggerBucket: ${prefix}_bitsy
+  triggerBucket: ${prefix}_bitsy_v1
   opsBucket: ${prefix}_operation
 
   target:
     URL: ssh://127.0.0.1/
     credentials: localhost
 
-  config: $LoadJSON(config.json)
+  config: $Cat(config.json)
 
 pipeline:
   deploy:
     setSdk:
       action: sdk:set
       target: $target
-      sdk: go:1.15
+      sdk: go:1.21
 
     build:
       action: exec:run
@@ -46,7 +46,7 @@ pipeline:
       credentials: $gcpCredentials
       environmentVariables:
         CONFIG: $AsJSON($config)
-      runtime: go113
+      runtime: go121
       eventTrigger:
         eventType: google.storage.object.finalize
         resource: projects/_/buckets/${triggerBucket}
