@@ -8,6 +8,7 @@ require (
 	cloud.google.com/go/pubsub v1.45.1
 	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
 	github.com/francoispqt/gojay v1.2.13
+	github.com/google/uuid v1.6.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
@@ -35,7 +36,6 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
